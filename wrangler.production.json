@@ -17,8 +17,8 @@
   "d1_databases": [
     {
       "binding": "DB",
-      "database_name": "govsync-demo",
-      "database_id": "c00579d6-6561-4b04-94cf-125ee8b4e26b",
+      "database_name": "govsync-prod",
+      "database_id": "41356663-8656-43e7-8994-a8a65e3445ac",
       "migrations_dir": "drizzle"
     }
   ]
