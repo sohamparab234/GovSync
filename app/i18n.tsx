@@ -5,6 +5,65 @@ export type Language='en'|'hi'|'mr';
 export const translations:Record<string,[string,string]>={
  ...authTranslations,
 "Select a submitted application":["जमा किया गया आवेदन चुनें","सादर केलेला अर्ज निवडा"],
+"Ration Card (PDS Security)": ["राशन कार्ड (सार्वजनिक वितरण)", "रेशन कार्ड (सार्वजनिक वितरण)"],
+"Passport Application": ["पासपोर्ट आवेदन", "पारपत्र (पासपोर्ट) अर्ज"],
+"Old Age Pension": ["वृद्धावस्था पेंशन", "श्रावणबाळ / वृद्धापकाळ निवृत्तीवेतन"],
+"Income Certificate": ["आय प्रमाणपत्र", "उत्पन्नाचा दाखला"],
+"Caste / Community Certificate": ["जाति / समुदाय प्रमाणपत्र", "जात / प्रवर्ग प्रमाणपत्र"],
+"Apply for a new subsidized digital ration card for household food grain access under NFSA / PDS.": ["राष्ट्रीय खाद्य सुरक्षा अधिनियम के तहत रियायती खाद्यान्न के लिए डिजिटल राशन कार्ड का आवेदन करें।", "राष्ट्रीय अन्न सुरक्षा कायद्यांतर्गत अनुदानित धान्यासाठी नवीन डिजिटल रेशन कार्डसाठी अर्ज करा."],
+"Apply for an Indian Ordinary Citizen Passport with automated identity, address, and DigiLocker verification.": ["पहचान, पते और डिजिलॉकर के स्वचालित सत्यापन के साथ भारतीय साधारण पासपोर्ट के लिए आवेदन करें।", "ओळख, पत्ता आणि डिजीलॉकर पडताळणीसह भारतीय सामान्य पारपत्रासाठी (पासपोर्ट) अर्ज करा."],
+"Monthly social security pension for senior citizens (60+ years) from economically weaker households.": ["आर्थिक रूप से कमज़ोर परिवारों के वरिष्ठ नागरिकों (६०+ वर्ष) के लिए मासिक सामाजिक सुरक्षा पेंशन।", "आर्थिकदृष्ट्या दुर्बल घटकांतील ज्येष्ठ नागरिकांसाठी (६०+ वर्षे) मासिक सामाजिक सुरक्षा पेन्शन."],
+"Official government income certificate based on verified tax assessment records and employer statements.": ["सत्यापित कर निर्धारण रिकॉर्ड और नियोक्ता विवरण पर आधारित आधिकारिक सरकारी आय प्रमाणपत्र।", "पडताळलेल्या कर मूल्यांकन नोंदींवर आधारित अधिकृत शासकीय उत्पन्नाचा दाखला."],
+"Official community and caste verification certificate for affirmative action schemes, admissions, and scholarships.": ["आरक्षण योजनाओं, प्रवेश और छात्रवृत्तियों के लिए आधिकारिक समुदाय और जाति सत्यापन प्रमाणपत्र।", "आरक्षण योजना, प्रवेश आणि शिष्यवृत्तीसाठी अधिकृत जात व प्रवर्ग पडताळणी प्रमाणपत्र."],
+"All services": ["सभी सेवाएँ", "सर्व सेवा"],
+"Public Distribution": ["सार्वजनिक वितरण", "सार्वजनिक वितरण"],
+"Identity & Travel": ["पहचान व यात्रा", "ओळख आणि प्रवास"],
+"Social Welfare": ["सामाजिक कल्याण", "समाज कल्याण"],
+"Documentation": ["दस्तावेज़ीकरण", "दस्तऐवजीकरण"],
+"Ration Card Category": ["राशन कार्ड श्रेणी", "रेशन कार्ड वर्गवारी"],
+"Priority Household (PHH)": ["प्राथमिकता गृहस्थ (PHH)", "प्राधान्य कुटुंब (PHH)"],
+"Antyodaya Anna Yojana (AAY)": ["अंत्योदय अन्न योजना (AAY)", "अंत्योदय अन्न योजना (AAY)"],
+"Non-NFSA Subsidized": ["गैर-एनएफएसए रियायती", "विना-एनएफएसए अनुदानित"],
+"Total Family Members Count": ["परिवार के कुल सदस्यों की संख्या", "कुटुंबातील एकूण सदस्यांची संख्या"],
+"Passport Booklet Type": ["पासपोर्ट पुस्तिका प्रकार", "पासपोर्ट पुस्तिका प्रकार"],
+"36 Pages (Standard)": ["३६ पृष्ठ (मानक)", "३६ पाने (प्रमाणित)"],
+"60 Pages (Jumbo)": ["६० पृष्ठ (जंबो)", "६० पाने (जंबो)"],
+"Validity Duration": ["वैधता अवधि", "वैधता कालावधी"],
+"10 Years (Adult)": ["१० वर्ष (वयस्क)", "१० वर्षे (प्रौढ)"],
+"5 Years": ["५ वर्ष", "५ वर्षे"],
+"Direct Benefit Transfer (DBT) Bank Account Reference": ["प्रत्यक्ष लाभ अंतरण (DBT) बैंक खाता संदर्भ", "थेट लाभ हस्तांतरण (DBT) बँक खाते संदर्भ"],
+"Purpose of Income Certificate": ["आय प्रमाणपत्र का प्रयोजन", "उत्पन्नाच्या दाखल्याचे प्रयोजन"],
+"Educational Scholarship": ["शैक्षणिक छात्रवृत्ति", "शैक्षणिक शिष्यवृत्ती"],
+"Fee Concession": ["शुल्क रियायत", "फी सवलत"],
+"Government Subsidy": ["सरकारी सब्सिडी", "शासकीय अनुदान"],
+"Legal / Court Purpose": ["विधिक / न्यायालयीन प्रयोजन", "कायदेशीर / न्यायालयीन प्रयोजन"],
+"Community / Caste Category": ["समुदाय / जाति श्रेणी", "प्रवर्ग / जात वर्गवारी"],
+"Scheduled Caste (SC)": ["अनुसूचित जाति (SC)", "अनुसूचित जाती (SC)"],
+"Scheduled Tribe (ST)": ["अनुसूचित जनजाति (ST)", "अनुसूचित जमाती (ST)"],
+"Other Backward Class (OBC)": ["अन्य पिछड़ा वर्ग (OBC)", "इतर मागासवर्गीय (OBC)"],
+"Special Backward Category (SBC)": ["विशेष पिछड़ा वर्ग (SBC)", "विशेष मागास प्रवर्ग (SBC)"],
+"Economically Weaker Section (EWS)": ["आर्थिक रूप से कमज़ोर वर्ग (EWS)", "आर्थिकदृष्ट्या दुर्बल घटक (EWS)"],
+"Sub-Caste / Sub-Tribe (as per revenue record)": ["उप-जाति / उप-जनजाति (राजस्व रिकॉर्ड अनुसार)", "पोट-जात / पोट-जमात (महसूल नोंदीनुसार)"],
+"Simulated Connected Government Services (Demonstration Environment)": ["सिम्युलेटेड जुड़ी हुई सरकारी सेवाएँ (प्रदर्शन वातावरण)", "सिम्युलेटेड जोडलेल्या शासकीय सेवा (प्रात्यक्षिक वातावरण)"],
+"Simulated government integration — fictional demo records only.": ["सिम्युलेटेड सरकारी एकीकरण — केवल काल्पनिक डेमो रिकॉर्ड।", "सिम्युलेटेड शासकीय एकत्रीकरण — फक्त काल्पनिक डेमो नोंदी."],
+"Discrepancy detected between government registries": ["सरकारी रजिस्टरों के बीच विसंगति पाई गई", "शासकीय नोंदवह्यांमध्ये तफावत आढळली"],
+"Accept authoritative government record": ["आधिकारिक सरकारी रिकॉर्ड स्वीकार करें", "अधिकृत शासकीय नोंद स्वीकारा"],
+"Attach explanation for officer review": ["अधिकारी की समीक्षा के लिए स्पष्टीकरण जोड़ें", "अधिकारी पुनरावलोकनासाठी स्पष्टीकरण जोडा"],
+"Explanation Note": ["स्पष्टीकरण टिप्पणी", "स्पष्टीकरणाची नोंद"],
+"Discrepancy acknowledged by citizen": ["नागरिक द्वारा विसंगति स्वीकार की गई", "नागरिकाने तफावत मान्य केली"],
+"2 connected sources": ["२ जुड़े स्रोत", "२ जोडलेले स्रोत"],
+"Ration Card": ["राशन कार्ड", "रेशन कार्ड"],
+"Food grain subsidy": ["खाद्यान्न सब्सिडी", "अन्नधान्य अनुदान"],
+"Old age assistance": ["वृद्धावस्था सहायता", "वृद्धापकाळ साहाय्य"],
+"Passport": ["पासपोर्ट", "पारपत्र"],
+"Pension": ["पेंशन", "निवृत्तीवेतन"],
+"Age": ["आयु", "वय"],
+"Current Address": ["वर्तमान पता", "सध्याचा पत्ता"],
+"Supporting document": ["सहायक दस्तावेज़", "सहायक कागदपत्र"],
+"Financial Year": ["वित्तीय वर्ष", "आर्थिक वर्ष"],
+"Tax Assessment Reference": ["कर निर्धारण संदर्भ", "कर मूल्यांकन संदर्भ"],
+"Community document": ["समुदाय दस्तावेज़", "प्रवर्ग कागदपत्र"],
+"Estimated time": ["अनुमानित समय", "अंदाजे वेळ"],
 "No submitted applications yet":["अभी कोई आवेदन जमा नहीं हुआ है","अद्याप कोणताही अर्ज सादर केलेला नाही"],
 "Saved verification records from submitted applications. No new department request is made.":["जमा किए गए आवेदनों के सहेजे गए सत्यापन रिकॉर्ड। विभाग को नया अनुरोध नहीं भेजा जाता।","सादर केलेल्या अर्जांच्या जतन केलेल्या पडताळणी नोंदी. विभागाला नवीन विनंती पाठवली जात नाही."],
 "Submit a verified citizen application first, then return here. Draft applications are private to the citizen.":["पहले सत्यापित नागरिक आवेदन जमा करें, फिर यहाँ आएँ। मसौदा आवेदन केवल नागरिक को दिखते हैं।","प्रथम पडताळलेला नागरिक अर्ज सादर करा, मग येथे या. मसुदा अर्ज फक्त नागरिकाला दिसतात."],
@@ -38,6 +97,7 @@ export const translations:Record<string,[string,string]>={
  "Track application": ["आवेदन की स्थिति देखें", "अर्जाची स्थिती पाहा"],
  "4 connected sources": ["४ जुड़े स्रोत", "४ जोडलेले स्रोत"],
  "3 connected sources": ["३ जुड़े स्रोत", "३ जोडलेले स्रोत"],
+"{count} connected sources": ["{count} जुड़े स्रोत", "{count} जोडलेले स्रोत"],
  "Connected citizen services": ["जुड़ी हुई नागरिक सेवाएँ", "जोडलेल्या नागरिक सेवा"],
  "One place for the services that matter.": ["आपकी ज़रूरी सेवाएँ, एक ही जगह।", "तुमच्या गरजेच्या सेवा, एकाच ठिकाणी."],
  "Apply with verified information and follow your application at every step.": ["सत्यापित जानकारी से आवेदन करें और हर चरण में उसकी स्थिति देखें।", "पडताळलेल्या माहितीसह अर्ज करा आणि प्रत्येक टप्प्यावर त्याची स्थिती पाहा."],
@@ -636,6 +696,14 @@ export const translations:Record<string,[string,string]>={
   "आपका निवास प्रमाणपत्र तैयार है।",
   "तुमचे रहिवास प्रमाणपत्र तयार आहे."
  ],
+ "Your certificate is ready.": [
+  "आपका प्रमाणपत्र तैयार है।",
+  "तुमचे प्रमाणपत्र तयार आहे."
+ ],
+ "Your application is approved.": [
+  "आपका आवेदन स्वीकृत हो गया है।",
+  "तुमचा अर्ज मंजूर झाला आहे."
+ ],
  "DEMONSTRATION ONLY — not a government certificate": [
   "केवल प्रदर्शन हेतु — सरकारी प्रमाणपत्र नहीं",
   "फक्त प्रात्यक्षिकासाठी — सरकारी प्रमाणपत्र नाही"
@@ -1100,6 +1168,219 @@ export const translations:Record<string,[string,string]>={
   "डेटा उपयोग रोका गया: सहमति अनुपस्थित, समाप्त या वापस ली गई है।",
   "माहितीचा वापर नाकारला: संमती नाही, संपली किंवा मागे घेतली आहे."
  ]
+,
+  "API registry": [
+   "एपीआई रजिस्ट्री",
+   "एपीआय नोंदणी"
+  ],
+  "Department & API Registry": [
+   "विभाग और एपीआई रजिस्ट्री",
+   "विभाग आणि एपीआय नोंदणी"
+  ],
+  "Department Registry": [
+   "विभाग रजिस्ट्री",
+   "विभाग नोंदणी"
+  ],
+  "Field contracts": [
+   "फ़ील्ड अनुबंध",
+   "फील्ड करार"
+  ],
+  "Authority": [
+   "प्राधिकरण",
+   "प्राधिकरण"
+  ],
+  "Jurisdiction": [
+   "अधिकार क्षेत्र",
+   "अधिकार क्षेत्र"
+  ],
+  "Base URL": [
+   "आधार URL",
+   "बेस URL"
+  ],
+  "Authentication": [
+   "प्रमाणीकरण",
+   "प्रमाणीकरण"
+  ],
+  "Target SLA": [
+   "लक्षित SLA",
+   "लक्षित SLA"
+  ],
+  "Measured latency": [
+   "मापी गई विलंबता",
+   "मोजलेला विलंब"
+  ],
+  "Data fields provided": [
+   "प्रदान किए गए डेटा फ़ील्ड",
+   "प्रदान केलेले डेटा फील्ड"
+  ],
+  "Simulated sandbox endpoint": [
+   "सिम्युलेटेड सैंडबॉक्स एंडपॉइंट",
+   "सिम्युलेटेड सँडबॉक्स एंडपॉइंट"
+  ],
+  "Simulated demonstration endpoint — metrics reflect local request execution; live national gateways are simulated.": [
+   "सिम्युलेटेड प्रदर्शन एंडपॉइंट — मेट्रिक्स स्थानीय अनुरोध निष्पादन दर्शाते हैं; वास्तविक राष्ट्रीय गेटवे सिम्युलेटेड हैं।",
+   "सिम्युलेटेड प्रात्यक्षिक एंडपॉइंट — मेट्रिक्स स्थानिक विनंती अंमलबजावणी दर्शवतात; प्रत्यक्ष राष्ट्रीय गेटवे सिम्युलेटेड आहेत."
+  ],
+  "Live API monitor": [
+   "लाइव एपीआई मॉनिटर",
+   "थेट एपीआय मॉनिटर"
+  ],
+  "Contract specifications": [
+   "अनुबंध विनिर्देश",
+   "करार तपशील"
+  ],
+  "Standardized GovSync field": [
+   "मानकीकृत GovSync फ़ील्ड",
+   "प्रमाणित GovSync फील्ड"
+  ],
+  "Source field": [
+   "स्रोत फ़ील्ड",
+   "स्रोत फील्ड"
+  ],
+  "Data type": [
+   "डेटा प्रकार",
+   "डेटा प्रकार"
+  ],
+  "1. Citizen authorization & consent": [
+   "१. नागरिक प्राधिकरण और सहमति",
+   "१. नागरिक अधिकृतता आणि संमती"
+  ],
+  "2. Department record verification": [
+   "२. विभाग रिकॉर्ड सत्यापन",
+   "२. विभाग नोंद पडताळणी"
+  ],
+  "3. Automated eligibility assessment": [
+   "३. स्वचालित पात्रता मूल्यांकन",
+   "३. स्वयंचलित पात्रता मूल्यमापन"
+  ],
+  "4. Application submission": [
+   "४. आवेदन प्रस्तुति",
+   "४. अर्ज सादरीकरण"
+  ],
+  "5. Department officer review": [
+   "५. विभागीय अधिकारी समीक्षा",
+   "५. विभागीय अधिकारी पुनरावलोकन"
+  ],
+  "6. Certificate generation & issuance": [
+   "६. प्रमाणपत्र निर्माण और जारी करना",
+   "६. प्रमाणपत्र निर्मिती व वितरण"
+  ],
+  "Scopes authorized": [
+   "अधिकृत दायरे",
+   "अधिकृत कार्यक्षेत्र"
+  ],
+  "Consent active": [
+   "सहमति सक्रिय",
+   "संमती सक्रिय"
+  ],
+  "Pending": [
+   "लंबित",
+   "प्रलंबित"
+  ],
+  "rules passed": [
+   "नियम सफल",
+   "नियम यशस्वी"
+  ],
+  "Awaiting verification to evaluate eligibility.": [
+   "पात्रता मूल्यांकन के लिए सत्यापन की प्रतीक्षा है।",
+   "पात्रता मूल्यमापनासाठी पडताळणीची प्रतीक्षा आहे."
+  ],
+  "Routed to": [
+   "को भेजा गया",
+   "कडे पाठवले"
+  ],
+  "Application has not been submitted yet.": [
+   "आवेदन अभी तक प्रस्तुत नहीं किया गया है।",
+   "अर्ज अद्याप सादर केलेला नाही."
+  ],
+  "Under review": [
+   "समीक्षाधीन",
+   "पुनरावलोकनाधीन"
+  ],
+  "Assigned to department officer queue. Decision pending.": [
+   "विभागीय अधिकारी कतार में सौंपा गया। निर्णय लंबित।",
+   "विभागीय अधिकारी रांगेत नियुक्त. निर्णय प्रलंबित."
+  ],
+  "Reviewed by": [
+   "द्वारा समीक्षा की गई",
+   "द्वारे पुनरावलोकन केले"
+  ],
+  "Reason": [
+   "कारण",
+   "कारण"
+  ],
+  "has been digitally generated.": [
+   "डिजिटल रूप से तैयार किया गया है।",
+   "डिजिटल स्वरूपात तयार केले गेले आहे."
+  ],
+  "Export audit trail": [
+   "ऑडिट ट्रेल निर्यात करें",
+   "ऑडिट ट्रेल निर्यात करा"
+  ],
+  "Clarification requested by department": [
+   "विभाग द्वारा स्पष्टीकरण का अनुरोध",
+   "विभागाकडून स्पष्टीकरणाची विनंती"
+  ],
+  "Please review your application details and submit clarification.": [
+   "कृपया अपने आवेदन विवरण की समीक्षा करें और स्पष्टीकरण प्रस्तुत करें।",
+   "कृपया आपल्या अर्जाच्या तपशीलाचे पुनरावलोकन करा आणि स्पष्टीकरण सादर करा."
+  ],
+  "Your response to reviewing officer": [
+   "समीक्षा अधिकारी को आपका उत्तर",
+   "पुनरावलोकन अधिकाऱ्याला आपले उत्तर"
+  ],
+  "Write a clear explanation for the officer (minimum 10 characters)...": [
+   "अधिकारी के लिए स्पष्टीकरण लिखें (न्यूनतम १० वर्ण)...",
+   "अधिकाऱ्यासाठी स्पष्टीकरण लिहा (किमान १० अक्षरे)..."
+  ],
+  "Submitting…": [
+   "जमा किया जा रहा है…",
+   "सादर करत आहे…"
+  ],
+  "Timeline": [
+   "समयरेखा",
+   "टाइमलाइन"
+  ],
+  "Audit history": [
+   "ऑडिट इतिहास",
+   "ऑडिट इतिहास"
+  ],
+  "Citizen": [
+   "नागरिक",
+   "नागरिक"
+  ],
+  "Required": [
+   "आवश्यक",
+   "आवश्यक"
+  ],
+  "Yes": [
+   "हाँ",
+   "होय"
+  ],
+  "No": [
+   "नहीं",
+   "नाही"
+  ],
+  "Description": [
+   "विवरण",
+   "तपशील"
+  ],
+  "Code": [
+   "कोड",
+   "कोड"
+  ],
+  "Endpoint": [
+   "एंडपॉइंट",
+   "एंडपॉइंट"
+  ],
+  "Registry specifications": [
+   "रजिस्ट्री विनिर्देश",
+   "नोंदणी तपशील"
+  ],
+  "All departments healthy": [
+   "सभी विभाग स्वस्थ",
+   "सर्व विभाग सुरळीत"
+  ]
 };
 export const localeFor=(lang:Language)=>lang==='en'?'en-IN':lang+'-IN-u-nu-deva';
 export function translate(lang:Language,key:string,params:Record<string,string|number>={}) {

@@ -17,8 +17,8 @@ function load(filename){const file=path.resolve(filename);if(cache[file])return 
  new Function('require','exports','module',js)(name=>{
   if(name==='cloudflare:workers')return {env:{DB:db}};
   if(name==='@/lib/auth')return {account:async request=>{const role=request.headers.get('test-role');if(!role)throw new (load('lib/server.ts').ApiError)(401,'Please sign in to continue.');return {id:'tester',role};},authRoute:()=>{}};
-  if(name.startsWith('@/'))return load(name.slice(2)+'.ts');
-  if(name.startsWith('.'))return load(path.resolve(path.dirname(file),name+'.ts'));
+  if(name.startsWith('@/'))return load(name.slice(2).replace(/(\.ts)?$/,'.ts'));
+  if(name.startsWith('.'))return load(path.resolve(path.dirname(file),name.replace(/(\.ts)?$/,'.ts')));
   return require(name);
  },mod.exports,mod);return mod.exports;
 }

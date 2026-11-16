@@ -1,5 +1,9 @@
 import type React from 'react';
-import type { Department, Service } from './demo';
+import type { Department } from './demo';
+import type { Service, ServiceCategory, ServiceDefinition, EligibilityRuleConfig, DataConflict } from './services';
+import type { DepartmentApiMetadata, FieldContract } from './registry';
+
+export type { Service, ServiceCategory, ServiceDefinition, EligibilityRuleConfig, DataConflict, DepartmentApiMetadata, FieldContract };
 
 export interface UserRow {
   id: string;
@@ -63,7 +67,7 @@ export interface AuditRecord {
 export interface RuleEvaluation {
   label: string;
   passed: boolean;
-  detail: string;
+  detail?: string;
 }
 
 export interface AssessmentResult {

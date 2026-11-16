@@ -4,6 +4,7 @@ import {mappings,type Department} from '@/lib/demo';
 import {Table,TableBody,TableCell,TableHead,TableHeader,TableRow} from '@/components/ui/table';
 import {Tabs,TabsContent,TabsList,TabsTrigger} from '@/components/ui/tabs';
 import {api,Badge} from './workspace';
+import {getServiceName} from './portal';
 import {deptInfo} from './apply';
 import {useLanguage} from './i18n';
 import type {ApplicationRecord,AdminMappingData} from '@/lib/types';
@@ -39,7 +40,7 @@ export default function AdminMappings({applications}:{applications:ApplicationRe
    <label className="form-label" htmlFor="mapping-application">{t('Select a submitted application')}</label>
    <select id="mapping-application" className="choice" style={{width:'100%',maxWidth:'100%'}} value={active} disabled={!applications.length} onChange={e=>{setLoading(true);setData(null);setSelected(e.target.value);}}>
     {!applications.length&&<option value="">{t('No submitted applications yet')}</option>}
-    {applications.map(a=><option key={a.id} value={a.id}>{t(a.name)} · {a.id} · {t(a.service==='residence'?'Residence / Domicile Certificate':'Scholarship Application')}</option>)}
+    {applications.map(a=><option key={a.id} value={a.id}>{t(a.name)} · {a.id} · {t(getServiceName(a.service))}</option>)}
    </select>
    <p className="subtext section-gap">{t('Saved verification records from submitted applications. No new department request is made.')}</p>
    {!applications.length&&<p className="empty">{t('Submit a verified citizen application first, then return here. Draft applications are private to the citizen.')}</p>}

@@ -7,21 +7,28 @@ import {Select,SelectContent,SelectItem,SelectTrigger,SelectValue} from '@/compo
 import {Tabs,TabsContent,TabsList,TabsTrigger} from '@/components/ui/tabs';
 import {Table,TableBody,TableCell,TableHead,TableHeader,TableRow} from '@/components/ui/table';
 import {api,Badge,download} from './workspace';
-import {deptInfo,Profile,scholarshipFields,residenceFields} from './apply';
+import {deptInfo,Profile,getServiceFields} from './apply';
 import {useLanguage} from './i18n';
+import {getServiceName} from './portal';
+import {services,type Service} from '@/lib/services';
+import {getAllDepartments} from '@/lib/registry';
 import type {ApplicationRecord,AuditRecord,WorkspaceContext,DepartmentCheckState} from '@/lib/types';
 
 function DecisionCard({a,c}:{a:ApplicationRecord;c:WorkspaceContext}){
  const {t}=useLanguage(),[note,setNote]=useState(''),result=JSON.parse(a.result||'{}');
- return <section className="panel"><div className="panel-head"><div><h3>{t(a.service==='residence'?'Residence / Domicile Certificate':'Scholarship Application')}</h3><p className="tracking-id">{a.id}</p></div><Badge status={a.status}/></div><div className="panel-body"><Profile profile={result.profile||{}} fields={a.service==='residence'?residenceFields:scholarshipFields}/><div className="note section-gap">{(a.service==='residence'?['Identity','Residence','Documents']:['Identity','Education','Income','Residence']).map(source=>t(source)+' ✓').join(' · ')} · {t('Validation passed')}</div>{a.service==='residence'&&result.details&&<p className="section-gap">{t('Purpose')}: {t(String(result.details.purpose||''))}</p>}<div className="field section-gap"><label className="form-label" htmlFor={'note-'+a.id}>{t('Officer note')}</label><textarea id={'note-'+a.id} maxLength={1000} value={note} onChange={e=>setNote(e.target.value)}/><p className="subtext">{t('A reason is required for clarification or rejection.')}</p></div><div className="actions">{[['approved','Approve'],['clarification','Request Clarification'],['rejected','Reject']].map(([decision,label])=><button className={'btn '+(decision==='approved'?'primary':'')} key={decision} disabled={c.busy||(decision!=='approved'&&note.trim().length<10)} onClick={()=>c.decide(a,decision,note)}>{t(label)}</button>)}</div></div></section>;
+ const def=services[a.service as Service],serviceSources=def?.requiredSources||['identity','education','income','residence'];
+ const appAudits=c.workspace.audit.filter((r:AuditRecord)=>r.application_id===a.id);
+ const clarificationEvents=appAudits.filter((r:AuditRecord)=>r.action==='Clarification provided');
+ return <section className="panel"><div className="panel-head"><div><h3>{t(getServiceName(a.service))}</h3><p className="tracking-id">{a.id}</p></div><Badge status={a.status}/></div><div className="panel-body"><Profile profile={result.profile||{}} fields={getServiceFields(a.service)}/><div className="note section-gap">{serviceSources.map(source=>t(deptInfo[source as Department]?.title||source)+' ✓').join(' · ')} · {t('Validation passed')}</div>{a.service==='residence'&&result.details&&<p className="section-gap">{t('Purpose')}: {t(String(result.details.purpose||''))}</p>}{clarificationEvents.map((r:AuditRecord)=><div className="note section-gap" key={r.id}><strong>{t('Clarification response')}:</strong> {(()=>{try{const p=JSON.parse(r.details);return p.note||r.details;}catch{return r.details;}})()}</div>)}<div style={{display:'flex',gap:'0.5rem',alignItems:'center',marginTop:'0.75rem'}}><button className="btn small" onClick={()=>c.openApp(a)}>{t('Timeline')}</button></div><div className="field section-gap"><label className="form-label" htmlFor={'note-'+a.id}>{t('Officer note')}</label><textarea id={'note-'+a.id} maxLength={1000} value={note} onChange={e=>setNote(e.target.value)}/><p className="subtext">{t('A reason is required for clarification or rejection.')}</p></div><div className="actions">{[['approved','Approve'],['clarification','Request Clarification'],['rejected','Reject']].map(([decision,label])=><button className={'btn '+(decision==='approved'?'primary':'')} key={decision} disabled={c.busy||(decision!=='approved'&&note.trim().length<10)} onClick={()=>c.decide(a,decision,note)}>{t(label)}</button>)}</div></div></section>;
 }
 
 export default function Views({ctx:c}:{ctx:WorkspaceContext}){
  const {t,n,date}=useLanguage(),[search,setSearch]=useState(''),[dept,setDept]=useState<Department>('identity'),[response,setResponse]=useState<unknown>(null);
  const [reviewId,setReviewId]=useState(''),[queueStatus,setQueueStatus]=useState('all');
+ const [apiTab,setApiTab]=useState<'monitor'|'registry'>('monitor'),[citizenApiTab,setCitizenApiTab]=useState<'console'|'registry'>('console'),[selectedDept,setSelectedDept]=useState<Department>('identity');
  const logs=c.workspace.audit,requests=logs.filter((x:AuditRecord)=>x.action==='Department request'),successes=requests.filter((x:AuditRecord)=>x.outcome==='success').length;
  const apps=c.workspace.applications.filter((a:ApplicationRecord)=>(a.name+' '+t(a.name)+' '+a.id).toLowerCase().includes(search.toLowerCase()));
- const serviceName=(a:ApplicationRecord)=>t(a.service==='residence'?'Residence / Domicile Certificate':'Scholarship Application');
+ const serviceName=(a:ApplicationRecord)=>t(getServiceName(a.service));
  const send=()=>c.task(async()=>{if(!c.app)return;setResponse(null);try{const data=await api('departments/'+dept+'/'+c.app.citizen_id+'?applicationId='+c.app.id+(c.outage?'&simulate=unavailable':''));setResponse(data);c.setRecords((s:Record<string,DepartmentCheckState>)=>({...s,[dept]:data as DepartmentCheckState}));}finally{await c.refresh();}});
  if(c.view==='applications')return <section className="panel"><div className="panel-head"><h2>{t('Application history')} ({n(c.workspace.applications.length)})</h2><div className="field"><input aria-label={t('Search name or reference')} placeholder={t('Search name or reference')} value={search} onChange={e=>setSearch(e.target.value)}/></div></div>{apps.length?<Table className="data-table"><TableHeader><TableRow>{['Applicant','Service','Reference','Status','Created','Action'].map(s=><TableHead key={s}>{t(s)}</TableHead>)}</TableRow></TableHeader><TableBody>{apps.map((a:ApplicationRecord)=><TableRow key={a.id}><TableCell><strong>{t(a.name)}</strong><p className="subtext">{a.citizen_id}</p></TableCell><TableCell>{serviceName(a)}</TableCell><TableCell className="tracking-id">{a.id}</TableCell><TableCell><Badge status={a.status}/></TableCell><TableCell>{date(a.created_at)}</TableCell><TableCell><button className="btn small" disabled={c.busy} onClick={()=>c.openApp(a)}>{t('Open')}</button></TableCell></TableRow>)}</TableBody></Table>:<div className="empty"><h3>{t('No matching applications')}</h3><button className="btn section-gap" onClick={()=>c.reset()}>{t('Start a new application')}</button></div>}</section>;
  if(c.view==='dashboard')return <>
@@ -36,14 +43,90 @@ export default function Views({ctx:c}:{ctx:WorkspaceContext}){
   const avg=(rows:AuditRecord[])=>{const x=rows.filter((r:AuditRecord)=>typeof r.duration_ms==='number');return x.length?Math.round(x.reduce((sum:number,r:AuditRecord)=>sum+(r.duration_ms||0),0)/x.length):null;};
   const rate=(rows:AuditRecord[])=>rows.length?Math.round(rows.filter((r:AuditRecord)=>r.outcome==='success').length*100/rows.length):null;
   const ms=(v:number|null)=>v===null?'—':n(v)+' ms';
+  const depts=getAllDepartments();
   return <>
-   <div className="stats">{[['Total requests',n(requests.length)],['Successful',n(successes)],['Failed requests',n(requests.length-successes)],['Average response time',ms(avg(requests))]].map(([label,value])=><div className="panel stat" key={label}><span>{t(label)}</span><div className="number">{value}</div></div>)}</div>
-   <section className="panel"><div className="panel-head"><div><h2>{t('API monitor')}</h2><p className="subtext">{t('Department API health for submitted applications. Refreshes every 15 seconds.')}</p></div><button className="btn small" disabled={c.busy} onClick={()=>c.refresh()}>{t('Refresh')}</button></div>
-   <Table className="data-table"><TableHeader><TableRow>{['Department','Requests','Success rate','Average response time','Last checked','Latest result'].map(h=><TableHead key={h}>{t(h)}</TableHead>)}</TableRow></TableHeader><TableBody>{allDepartments.map(d=>{const rows=requests.filter((r:AuditRecord)=>r.department===d),pct=rate(rows);return <TableRow key={d}><TableCell>{t(deptInfo[d].title)}</TableCell><TableCell>{n(rows.length)}</TableCell><TableCell>{pct===null?'—':n(pct)+'%'}</TableCell><TableCell>{ms(avg(rows))}</TableCell><TableCell>{rows.length?date(rows[0].created_at):'—'}</TableCell><TableCell>{rows.length?<Badge status={pct!==null&&pct>=90?'success':'review'}>{t(pct!==null&&pct>=90?'Healthy':'Degraded')}</Badge>:t('No requests')}</TableCell></TableRow>;})}</TableBody></Table></section>
-   <section className="panel section-gap"><div className="panel-head"><h2>{t('Recent department requests')}</h2><span className="subtext">{t('Submitted applications only')}</span></div>{requests.length?<Table className="data-table"><TableHeader><TableRow>{['Time','Application','Department','Outcome','Response time'].map(h=><TableHead key={h}>{t(h)}</TableHead>)}</TableRow></TableHeader><TableBody>{requests.slice(0,15).map((r:AuditRecord)=><TableRow key={r.id}><TableCell>{date(r.created_at)}</TableCell><TableCell className="tracking-id">{r.application_id}</TableCell><TableCell>{t(deptInfo[r.department as Department]?.title||r.department||'')}</TableCell><TableCell><Badge status={r.outcome}/></TableCell><TableCell>{ms(typeof r.duration_ms==='number'?r.duration_ms:null)}</TableCell></TableRow>)}</TableBody></Table>:<p className="empty">{t('No requests')}</p>}</section>
+   <Tabs value={apiTab} onValueChange={v=>setApiTab(v as 'monitor'|'registry')}>
+    <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'1rem',flexWrap:'wrap',gap:'0.5rem'}}>
+     <TabsList className="tab-list">
+      <TabsTrigger className="tab-trigger" value="monitor">{t('Live API monitor')}</TabsTrigger>
+      <TabsTrigger className="tab-trigger" value="registry">{t('Department & API Registry')}</TabsTrigger>
+     </TabsList>
+     <button className="btn small" disabled={c.busy} onClick={()=>c.refresh()}>{t('Refresh')}</button>
+    </div>
+    <TabsContent value="monitor">
+     <div className="stats">{[['Total requests',n(requests.length)],['Successful',n(successes)],['Failed requests',n(requests.length-successes)],['Average response time',ms(avg(requests))]].map(([label,value])=><div className="panel stat" key={label}><span>{t(label)}</span><div className="number">{value}</div></div>)}</div>
+     <section className="panel"><div className="panel-head"><div><h2>{t('API monitor')}</h2><p className="subtext">{t('Department API health for submitted applications. Refreshes every 15 seconds.')}</p></div></div>
+     <Table className="data-table"><TableHeader><TableRow>{['Department','Requests','Success rate','Average response time','Last checked','Latest result'].map(h=><TableHead key={h}>{t(h)}</TableHead>)}</TableRow></TableHeader><TableBody>{allDepartments.map(d=>{const rows=requests.filter((r:AuditRecord)=>r.department===d),pct=rate(rows);return <TableRow key={d}><TableCell>{t(deptInfo[d].title)}</TableCell><TableCell>{n(rows.length)}</TableCell><TableCell>{pct===null?'—':n(pct)+'%'}</TableCell><TableCell>{ms(avg(rows))}</TableCell><TableCell>{rows.length?date(rows[0].created_at):'—'}</TableCell><TableCell>{rows.length?<Badge status={pct!==null&&pct>=90?'success':'review'}>{t(pct!==null&&pct>=90?'Healthy':'Degraded')}</Badge>:t('No requests')}</TableCell></TableRow>;})}</TableBody></Table></section>
+     <section className="panel section-gap"><div className="panel-head"><h2>{t('Recent department requests')}</h2><span className="subtext">{t('Submitted applications only')}</span></div>{requests.length?<Table className="data-table"><TableHeader><TableRow>{['Time','Application','Department','Outcome','Response time'].map(h=><TableHead key={h}>{t(h)}</TableHead>)}</TableRow></TableHeader><TableBody>{requests.slice(0,15).map((r:AuditRecord)=><TableRow key={r.id}><TableCell>{date(r.created_at)}</TableCell><TableCell className="tracking-id">{r.application_id}</TableCell><TableCell>{t(deptInfo[r.department as Department]?.title||r.department||'')}</TableCell><TableCell><Badge status={r.outcome}/></TableCell><TableCell>{ms(typeof r.duration_ms==='number'?r.duration_ms:null)}</TableCell></TableRow>)}</TableBody></Table>:<p className="empty">{t('No requests')}</p>}</section>
+    </TabsContent>
+    <TabsContent value="registry">
+     <div className="note section-gap"><strong>{t('Simulated sandbox endpoint')}:</strong> {t('Simulated demonstration endpoint — metrics reflect local request execution; live national gateways are simulated.')}</div>
+     <Tabs value={selectedDept} onValueChange={v=>setSelectedDept(v as Department)}>
+      <TabsList className="tab-list">{allDepartments.map(d=><TabsTrigger className="tab-trigger" key={d} value={d}>{t(deptInfo[d].title)}</TabsTrigger>)}</TabsList>
+      {depts.map(d=><TabsContent key={d.id} value={d.id}>
+       <section className="panel section-gap">
+        <div className="panel-head"><div><h2>{d.name}</h2><p className="subtext">{d.description}</p></div><Badge>{d.code}</Badge></div>
+        <div className="panel-body">
+         <div className="stats">
+          <div className="panel stat"><span>{t('Authority')}</span><div style={{fontSize:'0.9rem',fontWeight:600}}>{d.authority}</div></div>
+          <div className="panel stat"><span>{t('Jurisdiction')}</span><div style={{fontSize:'0.9rem',fontWeight:600}}>{d.jurisdiction}</div></div>
+          <div className="panel stat"><span>{t('Authentication')}</span><div style={{fontSize:'0.9rem',fontWeight:600}}>{d.authType}</div></div>
+          <div className="panel stat"><span>{t('Target SLA')}</span><div className="number">{n(d.slaTargetMs)} ms</div></div>
+          <div className="panel stat"><span>{t('Measured latency')}</span><div className="number">{ms(avg(requests.filter((r:AuditRecord)=>r.department===d.id)))}</div></div>
+         </div>
+         <p className="subtext section-gap"><strong>{t('Base URL')}:</strong> <code className="tracking-id">{d.sandboxUrl}</code></p>
+         <h3 className="section-gap">{t('Contract specifications')}</h3>
+         <Table className="data-table">
+          <TableHeader><TableRow>{['Standardized GovSync field','Source field','Data type','Description','Required'].map(h=><TableHead key={h}>{t(h)}</TableHead>)}</TableRow></TableHeader>
+          <TableBody>{d.contracts.map(c=><TableRow key={c.sourceField}><TableCell><strong>{c.targetField}</strong></TableCell><TableCell><code>{c.sourceField}</code></TableCell><TableCell><span className="subtext">{c.type}</span></TableCell><TableCell>{c.description}</TableCell><TableCell><Badge status={c.required?'success':'neutral'}>{t(c.required?'Yes':'No')}</Badge></TableCell></TableRow>)}</TableBody>
+         </Table>
+        </div>
+       </section>
+      </TabsContent>)}
+     </Tabs>
+    </TabsContent>
+   </Tabs>
   </>;
  }
- if(c.view==='apis')return <section className="panel"><div className="panel-head"><h2>{t('Sample API request console')}</h2></div><div className="panel-body">{!c.app?<div className="empty"><h3>{t('Authorize an application first')}</h3><button className="btn section-gap" onClick={()=>c.move('apply')}>{t('Services')}</button></div>:<><p>{t('Applicant')}: {t(c.app.name)} · {c.app.id}</p><label className="form-label section-gap" htmlFor="department">{t('Department')}</label><Select value={dept} onValueChange={v=>setDept(v as Department)}><SelectTrigger className="choice" id="department"><SelectValue/></SelectTrigger><SelectContent className="citizen-select-content">{allDepartments.map(d=><SelectItem key={d} value={d}>{t(deptInfo[d].title)}</SelectItem>)}</SelectContent></Select><pre className="code section-gap">{'GET /api/departments/'+dept+'/'+c.app.citizen_id+'?applicationId='+c.app.id}</pre><div className="consent-row"><Checkbox id="api-outage" checked={c.outage} onCheckedChange={v=>c.setOutage(!!v)}/><label htmlFor="api-outage">{t('Simulate a department outage')}</label></div><button className="btn primary section-gap" disabled={c.busy} onClick={send}>{t('Send request')}</button>{response!=null&&<><h3 className="section-gap">{t('Response')}</h3><pre className="code">{JSON.stringify(response,null,2)}</pre></>}</>}<p className="subtext section-gap">{t('Raw API values, IDs and user-entered text keep their original form.')}</p></div></section>;
+ if(c.view==='apis'){
+  const depts=getAllDepartments();
+  return <Tabs value={citizenApiTab} onValueChange={v=>setCitizenApiTab(v as 'console'|'registry')}>
+   <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'1rem',flexWrap:'wrap',gap:'0.5rem'}}>
+    <TabsList className="tab-list">
+     <TabsTrigger className="tab-trigger" value="console">{t('Sample API request console')}</TabsTrigger>
+     <TabsTrigger className="tab-trigger" value="registry">{t('Department & API Registry')}</TabsTrigger>
+    </TabsList>
+   </div>
+   <TabsContent value="console">
+    <section className="panel"><div className="panel-head"><h2>{t('Sample API request console')}</h2></div><div className="panel-body">{!c.app?<div className="empty"><h3>{t('Authorize an application first')}</h3><button className="btn section-gap" onClick={()=>c.move('apply')}>{t('Services')}</button></div>:<><p>{t('Applicant')}: {t(c.app.name)} · {c.app.id}</p><label className="form-label section-gap" htmlFor="department">{t('Department')}</label><Select value={dept} onValueChange={v=>setDept(v as Department)}><SelectTrigger className="choice" id="department"><SelectValue/></SelectTrigger><SelectContent className="citizen-select-content">{allDepartments.map(d=><SelectItem key={d} value={d}>{t(deptInfo[d].title)}</SelectItem>)}</SelectContent></Select><pre className="code section-gap">{'GET /api/departments/'+dept+'/'+c.app.citizen_id+'?applicationId='+c.app.id}</pre><div className="consent-row"><Checkbox id="api-outage" checked={c.outage} onCheckedChange={v=>c.setOutage(!!v)}/><label htmlFor="api-outage">{t('Simulate a department outage')}</label></div><button className="btn primary section-gap" disabled={c.busy} onClick={send}>{t('Send request')}</button>{response!=null&&<><h3 className="section-gap">{t('Response')}</h3><pre className="code">{JSON.stringify(response,null,2)}</pre></>}</>}<p className="subtext section-gap">{t('Raw API values, IDs and user-entered text keep their original form.')}</p></div></section>
+   </TabsContent>
+   <TabsContent value="registry">
+    <div className="note section-gap"><strong>{t('Simulated sandbox endpoint')}:</strong> {t('Simulated demonstration endpoint — metrics reflect local request execution; live national gateways are simulated.')}</div>
+    <Tabs value={selectedDept} onValueChange={v=>setSelectedDept(v as Department)}>
+     <TabsList className="tab-list">{allDepartments.map(d=><TabsTrigger className="tab-trigger" key={d} value={d}>{t(deptInfo[d].title)}</TabsTrigger>)}</TabsList>
+     {depts.map(d=><TabsContent key={d.id} value={d.id}>
+      <section className="panel section-gap">
+       <div className="panel-head"><div><h2>{d.name}</h2><p className="subtext">{d.description}</p></div><Badge>{d.code}</Badge></div>
+       <div className="panel-body">
+        <div className="stats">
+         <div className="panel stat"><span>{t('Authority')}</span><div style={{fontSize:'0.9rem',fontWeight:600}}>{d.authority}</div></div>
+         <div className="panel stat"><span>{t('Jurisdiction')}</span><div style={{fontSize:'0.9rem',fontWeight:600}}>{d.jurisdiction}</div></div>
+         <div className="panel stat"><span>{t('Authentication')}</span><div style={{fontSize:'0.9rem',fontWeight:600}}>{d.authType}</div></div>
+         <div className="panel stat"><span>{t('Target SLA')}</span><div className="number">{n(d.slaTargetMs)} ms</div></div>
+        </div>
+        <p className="subtext section-gap"><strong>{t('Base URL')}:</strong> <code className="tracking-id">{d.sandboxUrl}</code></p>
+        <h3 className="section-gap">{t('Contract specifications')}</h3>
+        <Table className="data-table">
+         <TableHeader><TableRow>{['Standardized GovSync field','Source field','Data type','Description','Required'].map(h=><TableHead key={h}>{t(h)}</TableHead>)}</TableRow></TableHeader>
+         <TableBody>{d.contracts.map(c=><TableRow key={c.sourceField}><TableCell><strong>{c.targetField}</strong></TableCell><TableCell><code>{c.sourceField}</code></TableCell><TableCell><span className="subtext">{c.type}</span></TableCell><TableCell>{c.description}</TableCell><TableCell><Badge status={c.required?'success':'neutral'}>{t(c.required?'Yes':'No')}</Badge></TableCell></TableRow>)}</TableBody>
+        </Table>
+       </div>
+      </section>
+     </TabsContent>)}
+    </Tabs>
+   </TabsContent>
+  </Tabs>;
+ }
  if(c.view==='mapping'&&c.workspace.user?.role==='admin')return <AdminMappings applications={c.workspace.applications}/>;
  if(c.view==='mapping')return <section className="panel"><div className="panel-head"><h2>{t('Source-to-profile mappings')}</h2>{c.workspace.user?.role==='citizen'&&<button className='btn small' onClick={()=>c.move('apis')}>{t('API monitor')}</button>}</div><div className="panel-body"><Tabs value={dept} onValueChange={v=>setDept(v as Department)}><TabsList className="tab-list">{allDepartments.map(d=><TabsTrigger className="tab-trigger" key={d} value={d}>{t(deptInfo[d].title)}</TabsTrigger>)}</TabsList>{allDepartments.map(d=><TabsContent key={d} value={d}><h3 className="section-gap">{t('Department fields → common fields')}</h3><pre className="code">{JSON.stringify(mappings[d],null,2)}</pre>{c.records[d]&&<div className="mapping-grid section-gap"><div><h3>{t('Actual sample response')}</h3><pre className="code">{JSON.stringify(c.records[d].raw,null,2)}</pre></div><div><h3>{t('Normalized record')}</h3><pre className="code">{JSON.stringify(c.records[d].normalized,null,2)}</pre></div></div>}</TabsContent>)}</Tabs><p className="subtext">{t('Raw API values, IDs and user-entered text keep their original form.')}</p></div></section>;
  if(c.view==='consent')return <section className="panel"><div className="panel-head"><h2>{t('Application permissions')}</h2></div><div className="panel-body"><div className="note">{t('Revoking consent blocks new data access and submission. Saved history remains.')}</div>{c.workspace.applications.length?c.workspace.applications.map((a:ApplicationRecord)=><div className="flow-line permission-row" key={a.id}><div><strong>{t(a.name)}</strong><p>{serviceName(a)}</p><p className="tracking-id">{a.id}</p><small>{(JSON.parse(a.scopes) as Department[]).map(d=>t(deptInfo[d].title)).join(' · ')}</small><small>{t('Expires')}: {date(a.expires_at,true)}</small></div><Badge>{t(!a.consent?'Revoked':a.expires_at<=new Date().toISOString()?'Expired':'Active')}</Badge><button className="btn small" disabled={c.busy||!a.consent||a.expires_at<=new Date().toISOString()} onClick={()=>c.revoke(a)}>{t('Revoke permission')}</button></div>):<p className="empty">{t('No permissions granted yet')}</p>}</div></section>;

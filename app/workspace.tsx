@@ -3,7 +3,7 @@ import {useEffect,useState} from 'react';
 import {serviceDepartments,type Service} from '@/lib/demo';
 import {trackedStatuses} from '@/lib/residence';
 import {LanguageProvider,useLanguage} from './i18n';
-import {PortalHeader,PortalHome,PortalResources,PortalFooter} from './portal';
+import {PortalHeader,PortalHome,PortalResources,PortalFooter,getServiceName} from './portal';
 import Apply from './apply';
 import Login from './login';
 import Views from './views';
@@ -95,9 +95,9 @@ function WorkspaceContent({initialRole}:{initialRole:'citizen'|'admin'}){
  return <div className="app-frame">
   <PortalHeader user={workspace.user} logout={logout} busy={busy} view={view} mode={mode} move={move} home={()=>{if(mode==='admin'){move('dashboard');return;}setQuery('');reset();}}/>
   <main className="workspace" id="main-content" tabIndex={-1}>
-   <div className="breadcrumb"><button onClick={()=>{setQuery('');reset();}}>{t('Home')}</button><span aria-hidden="true">/</span><span>{t(mode==='admin'?'Administration':'Citizen portal')}</span>{(view!=='apply'||service)&&<><span aria-hidden="true">/</span><strong>{t(view==='apply'?(service==='residence'?'Residence / Domicile Certificate':'Scholarship Application'):heading.label)}</strong></>}</div>
+   <div className="breadcrumb"><button onClick={()=>{setQuery('');reset();}}>{t('Home')}</button><span aria-hidden="true">/</span><span>{t(mode==='admin'?'Administration':'Citizen portal')}</span>{(view!=='apply'||service)&&<><span aria-hidden="true">/</span><strong>{t(view==='apply'?getServiceName(service||'scholarship'):heading.label)}</strong></>}</div>
 
-   {!(view==='apply'&&!service)&&<div className="heading page-heading"><div><p className="eyebrow">{t(mode==='citizen'?'Citizen portal':'Administration')}</p><h1>{t(view==='apply'?(service==='residence'?'Residence / Domicile Certificate':'Scholarship Application'):view==='dashboard'?'Administration dashboard':heading.label)}</h1></div>{mode==='citizen'&&<button className="btn" disabled={busy} onClick={()=>{setQuery('');reset();}}>{t('Start a new application')}</button>}</div>}
+   {!(view==='apply'&&!service)&&<div className="heading page-heading"><div><p className="eyebrow">{t(mode==='citizen'?'Citizen portal':'Administration')}</p><h1>{t(view==='apply'?getServiceName(service||'scholarship'):view==='dashboard'?'Administration dashboard':heading.label)}</h1></div>{mode==='citizen'&&<button className="btn" disabled={busy} onClick={()=>{setQuery('');reset();}}>{t('Start a new application')}</button>}</div>}
    {auth&&!(view==='apply'&&!service)&&<div className="note warn auth-notice"><span>{t('Sign in to save your applications.')} <a href="/signin-with-chatgpt?return_to=/" target="_top">{t('Sign in to workspace')}</a></span></div>}
    {error&&<div className="note error" role="alert">{t(error)} <button className="btn small" onClick={()=>{setError('');void refresh();}}>{t('Refresh')}</button></div>}
    {mode==='citizen'&&notices.length>0&&<details className="notifications"><summary>{t('Notifications')}</summary>{notices.map((a:AuditRecord)=><button className="notification" key={a.id} onClick={()=>{const row=workspace.applications.find(x=>x.id===a.application_id);if(row)void openApp(row);}}>{a.application_id} · {t(labels[a.outcome]||a.outcome)}</button>)}</details>}
