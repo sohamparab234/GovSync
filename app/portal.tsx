@@ -49,7 +49,7 @@ export function PortalHeader({ view, mode, move, home, logout, busy, user }: Por
   useEffect(() => { document.documentElement.style.fontSize = size + '%'; }, [size]);
   const links = mode === 'admin'
     ? [['dashboard', 'Overview'], ['audit', 'Activity'], ['mapping', 'Data mappings'], ['apis', 'API registry'], ['guide', 'Developer guide']]
-    : [['apply', 'Services'], ['applications', 'My applications'], ['consent', 'Permissions'], ['audit', 'Activity'], ['resources', 'Help']];
+    : [['apply', 'Services'], ['schemes', 'Scheme Finder'], ['applications', 'My applications'], ['consent', 'Permissions'], ['audit', 'Activity'], ['resources', 'Help']];
 
   return (
     <>
@@ -120,10 +120,10 @@ export function PortalHome({ ctx: c, query, clearSearch }: { ctx: WorkspaceConte
   });
 
   const popular = [
+    { label: 'Scheme Finder', desc: 'Discover official schemes', Icon: ScrollText, action: () => c.move('schemes') },
     { label: 'Certificates', desc: 'Residence and domicile', Icon: FileCheck2, action: () => c.reset('residence') },
     { label: 'Scholarships', desc: 'Education support', Icon: GraduationCap, action: () => c.reset('scholarship') },
     { label: 'Ration Card', desc: 'Food grain subsidy', Icon: ShoppingBasket, action: () => c.reset('ration-card') },
-    { label: 'Pension', desc: 'Old age assistance', Icon: HeartHandshake, action: () => c.reset('pension') },
   ];
 
   return (
@@ -320,6 +320,9 @@ export function PortalFooter({ mode, move, home }: { mode: 'citizen' | 'admin'; 
         </div>
         <div className="footer-links">
           <button onClick={home}>{t(mode === 'admin' ? 'Overview' : 'Services')}</button>
+          {mode === 'citizen' && (
+            <button onClick={() => move('schemes')}>{t('Scheme Finder')}</button>
+          )}
           <button onClick={() => move(mode === 'admin' ? 'guide' : 'resources')}>
             {t(mode === 'admin' ? 'Developer guide' : 'Help and about')}
           </button>

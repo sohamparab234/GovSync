@@ -1,5 +1,6 @@
 'use client';
 import {useState} from 'react';
+import Link from 'next/link';
 import {ArrowRight,Eye,EyeOff,Globe2,Landmark,LockKeyhole,Smartphone,UserRound,Download} from 'lucide-react';
 import {useLanguage} from './i18n';
 import {api} from './workspace';
@@ -23,6 +24,7 @@ export default function Login({onLogin,initialRole='citizen',initialError=''}:{i
     <div className="login-brand"><img src={siteConfig.logo} alt=""/><div><strong>{siteConfig.name}</strong><span>{t('Integrated government services')}</span></div></div>
     <h1>{t('One platform.')}<br/>{t('Multiple departments.')}<br/>{t('One unified experience.')}</h1>
     <p>{t('Apply for services, share verified information and follow your application from start to finish.')}</p>
+    <div className="hero-actions"><Link href="/schemes" className="btn">{t('Explore Government Schemes')}<ArrowRight size={17} aria-hidden="true"/></Link></div>
     <div className="login-illustration" role="img" aria-label={t('A citizen using a laptop to access government services.')}/>
    </section>
    <section className="login-panel" id="login-form" aria-labelledby="login-title">

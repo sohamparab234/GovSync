@@ -6,11 +6,12 @@ import {LanguageProvider,useLanguage} from './i18n';
 import {PortalHeader,PortalHome,PortalResources,PortalFooter,getServiceName} from './portal';
 import Apply from './apply';
 import Login from './login';
+import SchemeFinder from './scheme-finder';
 import Views from './views';
 import type {ApplicationRecord,CheckRecord,AuditRecord,CertificateData,WorkspaceData,WorkspaceContext,DepartmentCheckState,AssessmentResult} from '@/lib/types';
 
 export const navigation=[
- {id:'apply',label:'Services',group:'citizen'},{id:'applications',label:'My applications',group:'citizen'},
+ {id:'apply',label:'Services',group:'citizen'},{id:'schemes',label:'Scheme Finder',group:'citizen'},{id:'applications',label:'My applications',group:'citizen'},
  {id:'consent',label:'Permissions',group:'citizen'},{id:'audit',label:'Activity',group:'citizen'},{id:'resources',label:'Help',group:'citizen'},
  {id:'dashboard',label:'Overview',group:'admin'},{id:'apis',label:'API monitor',group:'admin'},
  {id:'mapping',label:'Data mappings',group:'admin'},{id:'guide',label:'Developer guide',group:'admin'}
@@ -97,11 +98,11 @@ function WorkspaceContent({initialRole}:{initialRole:'citizen'|'admin'}){
   <main className="workspace" id="main-content" tabIndex={-1}>
    <div className="breadcrumb"><button onClick={()=>{setQuery('');reset();}}>{t('Home')}</button><span aria-hidden="true">/</span><span>{t(mode==='admin'?'Administration':'Citizen portal')}</span>{(view!=='apply'||service)&&<><span aria-hidden="true">/</span><strong>{t(view==='apply'?getServiceName(service||'scholarship'):heading.label)}</strong></>}</div>
 
-   {!(view==='apply'&&!service)&&<div className="heading page-heading"><div><p className="eyebrow">{t(mode==='citizen'?'Citizen portal':'Administration')}</p><h1>{t(view==='apply'?getServiceName(service||'scholarship'):view==='dashboard'?'Administration dashboard':heading.label)}</h1></div>{mode==='citizen'&&<button className="btn" disabled={busy} onClick={()=>{setQuery('');reset();}}>{t('Start a new application')}</button>}</div>}
+   {!(view==='apply'&&!service)&&view!=='schemes'&&<div className="heading page-heading"><div><p className="eyebrow">{t(mode==='citizen'?'Citizen portal':'Administration')}</p><h1>{t(view==='apply'?getServiceName(service||'scholarship'):view==='dashboard'?'Administration dashboard':heading.label)}</h1></div>{mode==='citizen'&&<button className="btn" disabled={busy} onClick={()=>{setQuery('');reset();}}>{t('Start a new application')}</button>}</div>}
    {auth&&!(view==='apply'&&!service)&&<div className="note warn auth-notice"><span>{t('Sign in to save your applications.')} <a href="/signin-with-chatgpt?return_to=/" target="_top">{t('Sign in to workspace')}</a></span></div>}
    {error&&<div className="note error" role="alert">{t(error)} <button className="btn small" onClick={()=>{setError('');void refresh();}}>{t('Refresh')}</button></div>}
    {mode==='citizen'&&notices.length>0&&<details className="notifications"><summary>{t('Notifications')}</summary>{notices.map((a:AuditRecord)=><button className="notification" key={a.id} onClick={()=>{const row=workspace.applications.find(x=>x.id===a.application_id);if(row)void openApp(row);}}>{a.application_id} · {t(labels[a.outcome]||a.outcome)}</button>)}</details>}
-   {loading?<div className="loading-page" aria-busy="true"><div className="loading-line wide"/><span className="sr-only">{t('Loading your workspace')}</span></div>:<div className="content-canvas">{view==='apply'?(!service?<PortalHome ctx={ctx} query={query} clearSearch={()=>setQuery('')}/>:<Apply ctx={ctx}/>):view==='resources'?<PortalResources ctx={ctx}/>:<Views ctx={ctx}/>}</div>}
+   {loading?<div className="loading-page" aria-busy="true"><div className="loading-line wide"/><span className="sr-only">{t('Loading your workspace')}</span></div>:<div className="content-canvas">{view==='apply'?(!service?<PortalHome ctx={ctx} query={query} clearSearch={()=>setQuery('')}/>:<Apply ctx={ctx}/>):view==='schemes'&&mode==='citizen'?<SchemeFinder mode="citizen"/>:view==='resources'?<PortalResources ctx={ctx}/>:<Views ctx={ctx}/>}</div>}
   </main><PortalFooter mode={mode} move={move} home={()=>{setQuery('');reset();}}/>
  </div>;
 }
