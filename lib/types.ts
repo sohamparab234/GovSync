@@ -145,7 +145,7 @@ export interface WorkspaceContext {
   refresh: () => Promise<void>;
   move: (v: string) => void;
   reset: (next?: Service | null) => void;
-  openApp: (a: ApplicationRecord) => Promise<void>;
+  openApp: (a: ApplicationRecord, showCert?: boolean) => Promise<void>;
   begin: () => Promise<void>;
   retry: () => Promise<void>;
   submit: () => Promise<void>;

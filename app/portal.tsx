@@ -1,34 +1,14 @@
 'use client';
 import { useState, useEffect } from 'react';
-import {
-  ArrowRight,
-  FileCheck2,
-  GraduationCap,
-  MapPin,
-  Search,
-  LogOut,
-  ShoppingBasket,
-  Plane,
-  HeartHandshake,
-  FileText,
-  ScrollText,
-} from 'lucide-react';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { LogOut } from 'lucide-react';
 import { useLanguage } from './i18n';
 import { LanguageMenu } from './login';
 import { siteConfig } from './site-config';
-import { getAllServices, serviceCategories, services, type Service } from '@/lib/services';
-import type { ApplicationRecord, Account, WorkspaceContext } from '@/lib/types';
+import { services, type Service } from '@/lib/services';
+import type { Account, WorkspaceContext } from '@/lib/types';
+import { CitizenDashboard } from './citizen-dashboard';
 
-const iconMap: Record<string, React.ComponentType<{ size?: number; className?: string }>> = {
-  GraduationCap,
-  MapPin,
-  ShoppingBasket,
-  Plane,
-  HeartHandshake,
-  FileText,
-  ScrollText,
-};
+export { CitizenDashboard };
 
 export function getServiceName(serviceId: string): string {
   return services[serviceId as Service]?.name || serviceId;
@@ -105,180 +85,7 @@ export function PortalHeader({ view, mode, move, home, logout, busy, user }: Por
 }
 
 export function PortalHome({ ctx: c, query, clearSearch }: { ctx: WorkspaceContext; query?: string; clearSearch?: () => void }) {
-  const { t, n, date } = useLanguage();
-  const allServices = getAllServices();
-  const [search, setSearch] = useState(query || '');
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
-
-  const needle = search.trim().toLocaleLowerCase();
-  const matches = allServices.filter((s) => {
-    const matchesCategory = selectedCategory === 'all' || s.category === selectedCategory;
-    if (!matchesCategory) return false;
-    if (!needle) return true;
-    const searchable = [s.name, t(s.name), s.description, t(s.description), s.category, t(s.category), s.department, s.keywords].join(' ').toLocaleLowerCase();
-    return searchable.includes(needle);
-  });
-
-  const popular = [
-    { label: 'Scheme Finder', desc: 'Discover official schemes', Icon: ScrollText, action: () => c.move('schemes') },
-    { label: 'Certificates', desc: 'Residence and domicile', Icon: FileCheck2, action: () => c.reset('residence') },
-    { label: 'Scholarships', desc: 'Education support', Icon: GraduationCap, action: () => c.reset('scholarship') },
-    { label: 'Ration Card', desc: 'Food grain subsidy', Icon: ShoppingBasket, action: () => c.reset('ration-card') },
-  ];
-
-  return (
-    <>
-      <section className="dashboard-hero" aria-labelledby="portal-title">
-        <div className="dashboard-hero-copy">
-          <p className="eyebrow">{t('Connected citizen services')}</p>
-          <h1 id="portal-title">{t('Explore government services')}</h1>
-          <p>{t('Apply with verified information and follow your application at every step.')}</p>
-          <form
-            className="dashboard-search"
-            role="search"
-            onSubmit={(e) => {
-              e.preventDefault();
-              document.getElementById('services')?.scrollIntoView({ behavior: 'smooth' });
-            }}
-          >
-            <Search size={20} />
-            <input
-              aria-label={t('Search services')}
-              placeholder={t('Search services, certificates, schemes...')}
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-            <button className="btn primary" type="submit">{t('Search')}</button>
-          </form>
-        </div>
-        <div className="dashboard-art" aria-hidden="true" />
-      </section>
-
-      <section className="popular-section" aria-labelledby="popular-title">
-        <div className="section-heading">
-          <h2 id="popular-title">{t('Popular services')}</h2>
-          <a href="#services">{t('View all services')} <ArrowRight size={15} /></a>
-        </div>
-        <div className="popular-grid">
-          {popular.map(({ label, desc, Icon, action }, i) => (
-            <button className={'popular-item tone-' + i} key={label} onClick={action}>
-              <span><Icon size={24} /></span>
-              <div>
-                <strong>{t(label)}</strong>
-                <small>{t(desc)}</small>
-              </div>
-              <ArrowRight size={17} />
-            </button>
-          ))}
-        </div>
-      </section>
-
-      <div className="dashboard-lower">
-        <section className="service-section" id="services" aria-labelledby="service-heading">
-          <div className="section-heading">
-            <h2 id="service-heading">{t(needle ? 'Search results' : 'Available services')}</h2>
-            <span>{t('{count} services available', { count: matches.length })}</span>
-          </div>
-
-          <div className="note" style={{ marginBottom: '18px' }}>
-            <div>
-              <strong>{t('Simulated Connected Government Services (Demonstration Environment)')}</strong>
-              <p className="subtext">{t('Simulated government integration — fictional demo records only.')}</p>
-            </div>
-          </div>
-
-          <Tabs value={selectedCategory} onValueChange={setSelectedCategory}>
-            <TabsList className="tab-list">
-              <TabsTrigger className="tab-trigger" value="all">{t('All services')}</TabsTrigger>
-              {serviceCategories.map((cat) => (
-                <TabsTrigger className="tab-trigger" key={cat} value={cat}>{t(cat)}</TabsTrigger>
-              ))}
-            </TabsList>
-          </Tabs>
-
-          {needle && (
-            <div className="search-summary">
-              <p>{t('Results for')} <strong>“{search}”</strong></p>
-              <button className="text-link" onClick={() => { setSearch(''); clearSearch?.(); }}>
-                {t('Clear search')}
-              </button>
-            </div>
-          )}
-
-          {matches.length ? (
-            <div className="service-grid">
-              {matches.map((s) => {
-                const Icon = iconMap[s.icon] || FileCheck2;
-                return (
-                  <article className="panel service-card" key={s.id}>
-                    <div className="service-card-top">
-                      <Icon size={22} />
-                      <span className="service-category">{t(s.category)}</span>
-                    </div>
-                    <h3>{t(s.name)}</h3>
-                    <p>{t(s.description)}</p>
-                    <div className="service-card-bottom">
-                      <span>{t('{count} connected sources', { count: s.requiredSources.length })} · ~{s.estimatedTime}</span>
-                      <button className="text-link" onClick={() => c.reset(s.id)}>
-                        {t('Start Application')} <ArrowRight size={17} />
-                      </button>
-                    </div>
-                  </article>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="panel empty">
-              <h3>{t('No services found')}</h3>
-              <p>{t('Try scholarship, residence or certificate.')}</p>
-              <button className="btn section-gap" onClick={() => { setSearch(''); setSelectedCategory('all'); }}>
-                {t('Show all services')}
-              </button>
-            </div>
-          )}
-        </section>
-
-        <aside className="recent-applications">
-          <div className="section-heading">
-            <h2>{t('Your applications')}</h2>
-            <span>{n(c.workspace.applications.length)}</span>
-          </div>
-          {c.workspace.applications.length ? (
-            <>
-              {c.workspace.applications.slice(0, 4).map((a: ApplicationRecord) => (
-                <button key={a.id} className="recent-row" onClick={() => c.openApp(a)}>
-                  <span>{t(getServiceName(a.service))}</span>
-                  <small>{a.id} · {date(a.created_at)}</small>
-                  <strong>
-                    {t(
-                      a.status === 'submitted'
-                        ? 'Department Review'
-                        : a.status === 'approved'
-                        ? 'Approved'
-                        : a.status === 'clarification'
-                        ? 'Clarification requested'
-                        : a.status === 'rejected'
-                        ? 'Rejected'
-                        : 'In progress'
-                    )}
-                  </strong>
-                </button>
-              ))}
-              <button className="text-link" onClick={() => c.move('applications')}>
-                {t('View all applications')} <ArrowRight size={16} />
-              </button>
-            </>
-          ) : (
-            <div className="recent-empty">
-              <FileCheck2 size={28} />
-              <p>{t('Your applications will appear here.')}</p>
-              <small>{t('Choose a service to begin.')}</small>
-            </div>
-          )}
-        </aside>
-      </div>
-    </>
-  );
+  return <CitizenDashboard ctx={c} query={query} clearSearch={clearSearch} />;
 }
 
 export function PortalResources({ ctx: c }: { ctx: WorkspaceContext }) {

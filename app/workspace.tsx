@@ -57,13 +57,18 @@ function WorkspaceContent({initialRole}:{initialRole:'citizen'|'admin'}){
  function move(v:string){if(mode==='admin'&&!['dashboard','apis','mapping','guide','audit'].includes(v))return;if(mode==='citizen'&&!['mapping','apis'].includes(v)&&navigation.find(n=>n.id===v)?.group==='admin')return;setView(v);setError('');}
  function reset(next:Service|null=null){if(mode==='admin')return;setService(next);setApp(null);setRecords({});setChecks({});setStage(0);setScopes([]);setAccepted(false);setConfirmed(false);setError('');setOutage(false);setMismatch(false);setReuse('');setDetails({});setCertificate(null);setView('apply');setMode('citizen');}
  async function task(fn:()=>Promise<void>){setBusy(true);setError('');try{await fn();}catch(e:unknown){const err=e as {status?:number;message?:string};if(err.status===401)setAuth(true);setError(err.message||'Operation failed');}finally{setBusy(false);}}
- async function openApp(a:ApplicationRecord){await task(async()=>{
+ async function openApp(a:ApplicationRecord,showCert=false){await task(async()=>{
   const d=await api<{application:ApplicationRecord;checks:CheckRecord[]}>('applications/'+a.id),current=d.application;
   setApp(current);setService((current.service as Service)||'scholarship');setCitizen(current.citizen_id);
   setRecords(Object.fromEntries(d.checks.map(x=>[x.department,{raw:JSON.parse(x.raw) as Record<string,unknown>,normalized:JSON.parse(x.normalized) as Record<string,unknown>}])));
   setChecks(Object.fromEntries(d.checks.map(x=>[x.department,'success'])));
   setDetails(JSON.parse(current.details||'{}') as Record<string,unknown>);setStage(trackedStatuses.includes(current.status)?4:current.result?2:1);
-  setEmail(current.email||'asha@example.test');setStatement(current.statement||'');setConfirmed(false);setCertificate(null);move('apply');
+  setEmail(current.email||'asha@example.test');setStatement(current.statement||'');
+  if(showCert&&current.status==='approved'){
+   const certRes=await api<{certificate:CertificateData}>('applications/'+current.id+'/certificate');
+   setCertificate(certRes.certificate);
+  }else{setCertificate(null);}
+  setConfirmed(false);move('apply');
  });}
  async function runChecks(a:ApplicationRecord,simulate:boolean,sourceId=''){
   setStage(1);let failed=false;

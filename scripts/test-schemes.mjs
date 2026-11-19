@@ -405,6 +405,8 @@ new Function(
       ? loadLocalTs('app/auth-translations.ts')
       : name === './scheme-translations'
       ? loadLocalTs('app/scheme-translations.ts')
+      : name === './dashboard-translations'
+      ? loadLocalTs('app/dashboard-translations.ts')
       : require(name),
   i18nMod.exports,
   i18nMod

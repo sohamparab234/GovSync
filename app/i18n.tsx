@@ -1,11 +1,13 @@
 'use client';
 import {authTranslations} from './auth-translations';
 import {schemeTranslations} from './scheme-translations';
+import {dashboardTranslations} from './dashboard-translations';
 import {createContext,useContext,useEffect,useState} from 'react';
 export type Language='en'|'hi'|'mr';
 export const translations:Record<string,[string,string]>={
  ...authTranslations,
  ...schemeTranslations,
+ ...dashboardTranslations,
 "Select a submitted application":["जमा किया गया आवेदन चुनें","सादर केलेला अर्ज निवडा"],
 "Ration Card (PDS Security)": ["राशन कार्ड (सार्वजनिक वितरण)", "रेशन कार्ड (सार्वजनिक वितरण)"],
 "Passport Application": ["पासपोर्ट आवेदन", "पारपत्र (पासपोर्ट) अर्ज"],
@@ -1400,11 +1402,14 @@ export interface LanguageContextType {
 }
 const Context=createContext<LanguageContextType|null>(null);
 export function LanguageProvider({children}:{children:React.ReactNode}){
- const [language,setLanguage]=useState<Language>(()=>{
-  if(typeof window==='undefined')return 'en';
-  try{const saved=localStorage.getItem('GovSync-language');if(saved==='hi'||saved==='mr')return saved;}catch{}
-  return 'en';
- });
+ const [language,setLanguage]=useState<Language>('en');
+ useEffect(()=>{
+  try{
+   const saved=localStorage.getItem('GovSync-language');
+   // eslint-disable-next-line react-hooks/set-state-in-effect
+   if(saved==='hi'||saved==='mr')setLanguage(saved);
+  }catch{}
+ },[]);
  useEffect(()=>{document.documentElement.lang=language;try{localStorage.setItem('GovSync-language',language);}catch{}},[language]);
  const t=(key:string,params?:Record<string,string|number>)=>translate(language,key,params);
  const n=(value:number,options?:Intl.NumberFormatOptions)=>new Intl.NumberFormat(localeFor(language),options).format(value);
