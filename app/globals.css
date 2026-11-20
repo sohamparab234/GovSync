@@ -442,13 +442,54 @@ html[lang="hi"] h2,html[lang="mr"] h2{letter-spacing:0;line-height:1.5}
 .service-search-inline svg{position:absolute;left:10px;color:var(--text-muted);pointer-events:none}
 .service-search-inline input{width:100%;padding:7px 12px 7px 34px;border:1px solid var(--border);border-radius:4px;background:var(--surface);color:var(--text);font-size:0.875rem}
 
+/* Smart Service Recommendation Engine */
+.recommendations-container{min-width:0;display:flex;flex-direction:column;gap:24px}
+.questionnaire-card{border:1px solid var(--border);background:var(--surface);border-radius:var(--radius)}
+.needs-selection-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:12px}
+.need-option-card{display:flex;flex-direction:column;align-items:flex-start;padding:16px 18px;background:var(--page-background);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;text-align:left;transition:border-color 0.15s,background-color 0.15s,transform 0.15s}
+.need-option-card:hover{border-color:var(--brand-secondary);background:var(--surface)}
+.need-option-card.selected{border-color:var(--brand-secondary);background:#FFF9F6}
+.need-card-header{width:100%;display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.need-icon-box{width:36px;height:36px;border-radius:6px;background:var(--surface);display:grid;place-items:center;color:var(--brand-primary);border:1px solid var(--border)}
+.need-option-card.selected .need-icon-box{background:var(--brand-secondary);color:#FFF;border-color:var(--brand-secondary)}
+.checkbox-indicator{width:20px;height:20px;border-radius:4px;border:1px solid var(--border);background:var(--surface);display:grid;place-items:center;transition:background-color 0.15s}
+.checkbox-indicator.checked{background:var(--brand-secondary);border-color:var(--brand-secondary)}
+.need-title{font-size:0.9375rem;font-weight:600;color:var(--brand-primary);line-height:1.35}
+
+.beneficiary-options-grid,.goal-options-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-bottom:14px}
+.choice-option-card{display:flex;align-items:center;gap:14px;padding:16px 18px;background:var(--page-background);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;text-align:left;transition:border-color 0.15s,background-color 0.15s}
+.choice-option-card:hover{border-color:var(--brand-secondary);background:var(--surface)}
+.choice-option-card.selected{border-color:var(--brand-secondary);background:#FFF9F6}
+.choice-icon-box{width:38px;height:38px;border-radius:6px;background:var(--surface);border:1px solid var(--border);display:grid;place-items:center;color:var(--brand-primary);flex-shrink:0}
+.choice-option-card.selected .choice-icon-box{background:var(--brand-secondary);color:#FFF;border-color:var(--brand-secondary)}
+.choice-label{font-size:0.9375rem;font-weight:600;color:var(--brand-primary);line-height:1.35}
+.goal-card{align-items:flex-start}
+
+.step-navigation-footer{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-top:20px;padding-top:16px;border-top:1px solid var(--border)}
+
+.recommendations-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.recommendation-item-card{display:flex;flex-direction:column;padding:24px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);transition:box-shadow 0.15s,border-color 0.15s}
+.recommendation-item-card:hover{box-shadow:var(--shadow);border-color:var(--brand-secondary)}
+.recommendation-item-card.strong_match{border-left:5px solid var(--success)}
+.recommendation-item-card.possible_match{border-left:5px solid var(--warning)}
+.recommendation-item-card.related_service{border-left:5px solid var(--brand-primary)}
+
+/* Recommendation callout banner in Dashboard */
+.recommendation-banner{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;padding:20px 24px;background:linear-gradient(135deg, #FFFDF8 0%, #F8EFE4 100%);border:1px solid #EAC8BC;border-radius:var(--radius);border-left:5px solid var(--brand-secondary)}
+.rec-banner-content{display:flex;align-items:flex-start;gap:16px}
+.rec-banner-icon{width:44px;height:44px;border-radius:8px;background:#FFF;border:1px solid #EAC8BC;display:grid;place-items:center;color:var(--brand-secondary);flex-shrink:0}
+
 @media(max-width:1024px){
  .dashboard-summary-cards,.quick-actions-grid,.recommended-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .needs-selection-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .recommendations-grid{grid-template-columns:1fr}
  .citizen-overview-main{flex-direction:column}
  .citizen-profile-box{width:100%}
 }
 @media(max-width:640px){
  .dashboard-summary-cards,.quick-actions-grid,.recommended-grid{grid-template-columns:1fr}
+ .needs-selection-grid{grid-template-columns:1fr}
+ .beneficiary-options-grid,.goal-options-grid{grid-template-columns:1fr}
  .my-apps-toolbar{flex-direction:column;align-items:stretch}
  .filter-and-sort{width:100%;justify-content:space-between}
  .filter-and-sort select{flex:1}
@@ -456,4 +497,5 @@ html[lang="hi"] h2,html[lang="mr"] h2{letter-spacing:0;line-height:1.5}
  .app-card-dates{align-items:flex-start}
  .deadline-item{flex-direction:column;align-items:flex-start}
  .status-tab-pills{display:none}
+ .recommendation-banner{flex-direction:column;align-items:flex-start}
 }

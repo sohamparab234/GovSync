@@ -407,6 +407,8 @@ new Function(
       ? loadLocalTs('app/scheme-translations.ts')
       : name === './dashboard-translations'
       ? loadLocalTs('app/dashboard-translations.ts')
+      : name === './recommendation-translations'
+      ? loadLocalTs('app/recommendation-translations.ts')
       : require(name),
   i18nMod.exports,
   i18nMod

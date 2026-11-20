@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {randomBytes} from 'node:crypto';
-const base=process.env.TEST_BASE_URL||'http://127.0.0.1:5177';
+const base=process.env.TEST_BASE_URL||'http://127.0.0.1:5173';
 if(!['127.0.0.1','localhost'].includes(new URL(base).hostname))throw new Error('Use an isolated local database.');
 const password='Test-'+randomBytes(12).toString('hex'),mobile=()=>`98${String(Math.floor(Math.random()*1e8)).padStart(8,'0')}`;
 let checks=0;

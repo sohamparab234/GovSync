@@ -21,6 +21,7 @@ import {
   User,
   Globe,
   RefreshCw,
+  Sparkles,
 } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useLanguage } from './i18n';
@@ -269,6 +270,31 @@ export function CitizenDashboard({ ctx: c, query, clearSearch }: CitizenDashboar
         </div>
       </section>
 
+      {/* SECTION R: Smart Service Recommendation Banner */}
+      <section className="recommendation-banner" aria-label={t('Smart Service Recommendations')}>
+        <div className="rec-banner-content">
+          <div className="rec-banner-icon">
+            <Sparkles size={24} />
+          </div>
+          <div>
+            <h3 style={{ margin: '0 0 4px 0', fontSize: '1.05rem', color: 'var(--brand-primary)', fontFamily: 'var(--heading-font)' }}>
+              {t('Need guidance finding the right service?')}
+            </h3>
+            <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--text-muted)', lineHeight: 1.45 }}>
+              {t('Answer a few questions to get tailored service and scheme recommendations.')}
+            </p>
+          </div>
+        </div>
+        <button
+          type="button"
+          className="btn primary"
+          onClick={() => c.move('recommendations')}
+        >
+          <Sparkles size={16} style={{ marginRight: '6px' }} />
+          {t('Get Recommendations')}
+        </button>
+      </section>
+
       {/* SECTION B: Application Summary Cards */}
       <section className="stats dashboard-summary-cards" aria-label={t('Total Applications')}>
         <button
@@ -397,14 +423,14 @@ export function CitizenDashboard({ ctx: c, query, clearSearch }: CitizenDashboar
           <button
             type="button"
             className="quick-action-card tone-1"
-            onClick={() => c.move('schemes')}
+            onClick={() => c.move('recommendations')}
           >
             <div className="quick-action-icon">
-              <ScrollText size={22} />
+              <Sparkles size={22} />
             </div>
             <div className="quick-action-body">
-              <strong>{t('Find Government Schemes')}</strong>
-              <small>{t('Discover Maharashtra and Central welfare schemes tailored to you.')}</small>
+              <strong>{t('Smart Service Recommendations')}</strong>
+              <small>{t('Find tailored services and schemes for your situation.')}</small>
             </div>
             <ArrowRight size={16} className="quick-action-arrow" />
           </button>
@@ -785,15 +811,25 @@ export function CitizenDashboard({ ctx: c, query, clearSearch }: CitizenDashboar
               {t('Popular connected public services ready for instant verification and application.')}
             </p>
           </div>
-          <button
-            type="button"
-            className="text-link"
-            onClick={() => {
-              document.getElementById('services')?.scrollIntoView({ behavior: 'smooth' });
-            }}
-          >
-            {t('View all 7 services')} <ArrowRight size={15} />
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <button
+              type="button"
+              className="btn small"
+              onClick={() => c.move('recommendations')}
+            >
+              <Sparkles size={14} style={{ marginRight: '4px' }} />
+              {t('Smart Service Recommendations')}
+            </button>
+            <button
+              type="button"
+              className="text-link"
+              onClick={() => {
+                document.getElementById('services')?.scrollIntoView({ behavior: 'smooth' });
+              }}
+            >
+              {t('View all 7 services')} <ArrowRight size={15} />
+            </button>
+          </div>
         </div>
 
         <div className="recommended-grid">

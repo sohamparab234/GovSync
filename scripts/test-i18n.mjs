@@ -5,7 +5,7 @@ const require=createRequire(import.meta.url),ts=require('typescript');
 const source=fs.readFileSync(new URL('../app/i18n.tsx',import.meta.url),'utf8');
 const compiled=ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS,jsx:ts.JsxEmit.ReactJSX}}).outputText;
 const loadLocalTs=(relPath)=>{const m={exports:{}};new Function("exports",ts.transpileModule(fs.readFileSync(relPath,"utf8"),{compilerOptions:{module:ts.ModuleKind.CommonJS}}).outputText)(m.exports);return m.exports;};
-const mod={exports:{}};new Function('require','exports','module',compiled)(name=>name==="./auth-translations"?loadLocalTs("app/auth-translations.ts"):name==="./scheme-translations"?loadLocalTs("app/scheme-translations.ts"):name==="./dashboard-translations"?loadLocalTs("app/dashboard-translations.ts"):require(name),mod.exports,mod);
+const mod={exports:{}};new Function('require','exports','module',compiled)(name=>name==="./auth-translations"?loadLocalTs("app/auth-translations.ts"):name==="./scheme-translations"?loadLocalTs("app/scheme-translations.ts"):name==="./dashboard-translations"?loadLocalTs("app/dashboard-translations.ts"):name==="./recommendation-translations"?loadLocalTs("app/recommendation-translations.ts"):require(name),mod.exports,mod);
 const {translate,localeFor,translations}=mod.exports;
 assert.equal(translate('en','Services'),'Services');
 assert.equal(translate('hi','Services'),'सेवाएँ');
@@ -20,7 +20,7 @@ for(const lang of ['hi','mr']){
  assert.ok(translate(lang,'{count} services available',{count:2}).includes('२'));
  assert.ok(translate(lang,'4 connected sources').includes('४'));
 }
-for(const p of (process.argv.includes('--mappings-only')?['app/admin-mappings.tsx']:['app/admin-mappings.tsx','app/login.tsx','lib/auth.ts','app/workspace.tsx','app/portal.tsx','app/citizen-dashboard.tsx','app/apply.tsx','app/views.tsx','app/scheme-finder.tsx','app/schemes/public-shell.tsx','app/api/[[...path]]/route.ts','lib/server.ts'])){
+for(const p of (process.argv.includes('--mappings-only')?['app/admin-mappings.tsx']:['app/admin-mappings.tsx','app/login.tsx','lib/auth.ts','app/workspace.tsx','app/portal.tsx','app/citizen-dashboard.tsx','app/service-recommendations.tsx','app/recommendations/public-shell.tsx','app/apply.tsx','app/views.tsx','app/scheme-finder.tsx','app/schemes/public-shell.tsx','app/api/[[...path]]/route.ts','lib/server.ts'])){
  const file=ts.createSourceFile(p,fs.readFileSync(new URL('../'+p,import.meta.url),'utf8'),ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX);
  const validateKey=node=>{
   if(ts.isStringLiteral(node))assert.ok(translations[node.text],p+': untranslated '+node.text);
