@@ -22,6 +22,7 @@ import {
   Globe,
   RefreshCw,
   Sparkles,
+  Route,
 } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useLanguage } from './i18n';
@@ -295,6 +296,31 @@ export function CitizenDashboard({ ctx: c, query, clearSearch }: CitizenDashboar
         </button>
       </section>
 
+      {/* SECTION J: Multi-Service Application Journey Banner */}
+      <section className="recommendation-banner journey-banner" aria-label={t('Multi-Service Application Journeys')} style={{ marginTop: '-12px', borderLeftColor: 'var(--brand-secondary)' }}>
+        <div className="rec-banner-content">
+          <div className="rec-banner-icon journey-icon" style={{ background: '#FFF0EA', color: 'var(--brand-secondary)' }}>
+            <Route size={24} />
+          </div>
+          <div>
+            <h3 style={{ margin: '0 0 4px 0', fontSize: '1.05rem', color: 'var(--brand-primary)', fontFamily: 'var(--heading-font)' }}>
+              {t('Applying for connected government benefits?')}
+            </h3>
+            <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--text-muted)', lineHeight: 1.45 }}>
+              {t('Track connected service prerequisites, see completed documents, and unlock your next step across 5 state journeys.')}
+            </p>
+          </div>
+        </div>
+        <button
+          type="button"
+          className="btn primary"
+          onClick={() => c.move('journeys')}
+        >
+          <Route size={16} style={{ marginRight: '6px' }} />
+          {t('Explore Service Journeys')}
+        </button>
+      </section>
+
       {/* SECTION B: Application Summary Cards */}
       <section className="stats dashboard-summary-cards" aria-label={t('Total Applications')}>
         <button
@@ -465,6 +491,22 @@ export function CitizenDashboard({ ctx: c, query, clearSearch }: CitizenDashboar
             <div className="quick-action-body">
               <strong>{t('Manage Consent & Permissions')}</strong>
               <small>{t('View or revoke department data sharing permissions at any time.')}</small>
+            </div>
+            <ArrowRight size={16} className="quick-action-arrow" />
+          </button>
+
+          <button
+            type="button"
+            className="quick-action-card tone-4"
+            data-action="journeys"
+            onClick={() => c.move('journeys')}
+          >
+            <div className="quick-action-icon">
+              <Route size={22} />
+            </div>
+            <div className="quick-action-body">
+              <strong>{t('Multi-Service Journeys')}</strong>
+              <small>{t('Track sequential prerequisites and connected service workflows.')}</small>
             </div>
             <ArrowRight size={16} className="quick-action-arrow" />
           </button>
@@ -643,6 +685,16 @@ export function CitizenDashboard({ ctx: c, query, clearSearch }: CitizenDashboar
                           {t('View Certificate')}
                         </button>
                       )}
+
+                      <button
+                        type="button"
+                        className="btn small outline"
+                        disabled={c.busy}
+                        onClick={() => c.move('journeys')}
+                      >
+                        <Route size={14} style={{ marginRight: '4px' }} />
+                        {t('View in Journey')}
+                      </button>
                     </div>
                   </article>
                 );
@@ -664,6 +716,9 @@ export function CitizenDashboard({ ctx: c, query, clearSearch }: CitizenDashboar
                 </button>
                 <button className="btn" onClick={() => c.move('schemes')}>
                   {t('Find schemes')}
+                </button>
+                <button type="button" className="btn" onClick={() => c.move('journeys')}>
+                  {t('Service Journeys')}
                 </button>
               </div>
             </div>

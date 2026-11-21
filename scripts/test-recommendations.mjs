@@ -291,6 +291,8 @@ console.log('14. Testing English, Hindi, and Marathi translation completeness...
         ? loadLocalTs('app/dashboard-translations.ts')
         : name === './recommendation-translations'
         ? loadLocalTs('app/recommendation-translations.ts')
+        : name === './journey-translations'
+        ? loadLocalTs('app/journey-translations.ts')
         : require(name),
     mod.exports,
     mod

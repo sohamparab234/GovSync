@@ -25,6 +25,7 @@ export default function Login({onLogin,initialRole='citizen',initialError=''}:{i
     <h1>{t('One platform.')}<br/>{t('Multiple departments.')}<br/>{t('One unified experience.')}</h1>
     <p>{t('Apply for services, share verified information and follow your application from start to finish.')}</p>
     <div className="hero-actions" style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+      <Link href="/journeys" className="btn">{t('Explore Service Journeys')}<ArrowRight size={17} aria-hidden="true"/></Link>
       <Link href="/recommendations" className="btn">{t('Smart Service Recommendations')}<ArrowRight size={17} aria-hidden="true"/></Link>
       <Link href="/schemes" className="btn">{t('Explore Government Schemes')}<ArrowRight size={17} aria-hidden="true"/></Link>
     </div>

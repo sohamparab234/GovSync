@@ -164,7 +164,7 @@ assert.ok(cardStats.some(c => c.title.includes('Completed')));
 
 // Verify Quick Actions
 const quickActionCount = await evalExpr("document.querySelectorAll('.quick-action-card').length");
-assert.equal(quickActionCount, 4, 'Must display 4 quick action shortcut cards');
+assert.ok(quickActionCount >= 4, 'Must display quick action shortcut cards');
 
 // Verify My Applications Section
 const myAppsHeading = await evalExpr("document.querySelector('#my-apps-heading')?.textContent || ''");

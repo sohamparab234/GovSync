@@ -46,7 +46,7 @@ h1,h2,.brand-copy strong{font-family:var(--heading-font);letter-spacing:-.025em}
 .recovery-check{display:flex;align-items:center;gap:12px;font-size:.875rem;margin:24px 0}.recovery-check input{width:19px;height:19px;accent-color:var(--brand-accent)}
 .login-footer{max-width:1320px;margin:28px auto 0;padding-top:20px;border-top:1px solid #D8CAB4;display:flex;justify-content:space-between;gap:16px;font-size:.8125rem;color:var(--text-muted)}
 .masthead{min-height:90px;background:var(--surface);gap:24px}.brand-mark{object-fit:contain;width:49px;height:53px}.brand-copy strong{font-size:1.6rem}.brand-copy span{font-size:.8125rem}
-.main-navigation{gap:13px}.nav-item{font-size:.875rem;flex-direction:row;padding:14px 5px;font-weight:500}.nav-item.active{font-weight:700}
+.main-navigation{gap:10px;flex-wrap:wrap}.nav-item{font-size:.875rem;flex-direction:row;padding:14px 5px;font-weight:500}.nav-item.active{font-weight:700}
 .header-actions{gap:18px}.logout{border:0;background:var(--surface-muted);font-size:.875rem}
 .account-strip{border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:10px max(28px,calc((100vw - 1304px)/2));display:flex;justify-content:space-between;align-items:center;gap:12px;background:#F8EFDF;font-size:.8125rem;color:var(--text-muted)}
 .account-strip>div{display:flex;gap:12px;align-items:center}.account-strip strong{color:var(--brand-primary);font-size:.875rem}.workspace{padding-top:19px}.breadcrumb{margin-bottom:18px}
