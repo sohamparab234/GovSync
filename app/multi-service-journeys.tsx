@@ -603,26 +603,26 @@ export function MultiServiceJourneys({
                                         prereq.dependencyType === 'mandatory'
                                           ? 'var(--surface-muted)'
                                           : prereq.dependencyType === 'conditional'
-                                          ? prereq.conditionApplicability === 'applies'
-                                            ? '#FFF4EE'
-                                            : '#F4FFF4'
-                                          : '#F4F7FF',
+                                            ? prereq.conditionApplicability === 'applies'
+                                              ? '#FFF4EE'
+                                              : '#F4FFF4'
+                                            : '#F4F7FF',
                                       borderColor:
                                         prereq.dependencyType === 'mandatory'
                                           ? 'var(--border)'
                                           : prereq.dependencyType === 'conditional'
-                                          ? prereq.conditionApplicability === 'applies'
-                                            ? 'var(--brand-secondary)'
-                                            : 'var(--success)'
-                                          : '#C8D8FF',
+                                            ? prereq.conditionApplicability === 'applies'
+                                              ? 'var(--brand-secondary)'
+                                              : 'var(--success)'
+                                            : '#C8D8FF',
                                       color:
                                         prereq.dependencyType === 'mandatory'
                                           ? 'var(--text-muted)'
                                           : prereq.dependencyType === 'conditional'
-                                          ? prereq.conditionApplicability === 'applies'
-                                            ? 'var(--brand-secondary-strong)'
-                                            : 'var(--success)'
-                                          : 'var(--brand-primary)',
+                                            ? prereq.conditionApplicability === 'applies'
+                                              ? 'var(--brand-secondary-strong)'
+                                              : 'var(--success)'
+                                            : 'var(--brand-primary)',
                                     }}
                                   >
                                     {depTypeBadge}

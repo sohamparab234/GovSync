@@ -11,6 +11,8 @@ import {
   Download,
   Printer,
   ChevronRight,
+  Scale,
+  ExternalLink,
 } from 'lucide-react';
 import { useLanguage } from './i18n';
 import { Badge, download } from './workspace';
@@ -18,6 +20,7 @@ import { deptInfo, Profile, getServiceFields } from './apply';
 import { getServiceName } from './portal';
 import type { Department } from '@/lib/demo';
 import type { ApplicationRecord, AuditRecord, ServiceDefinition, WorkspaceContext, RuleEvaluation } from '@/lib/types';
+import { calculateRtsDeadline } from '@/lib/rts';
 
 interface TimelineProps {
   app: ApplicationRecord;
@@ -32,6 +35,7 @@ export function ApplicationTimeline({ app, events, serviceDef, ctx: c, activeCon
   const { t, date } = useLanguage();
   const [clarificationText, setClarificationText] = useState('');
   const [submittingClarification, setSubmittingClarification] = useState(false);
+  const rtsDeadline = calculateRtsDeadline(app);
 
   // Group events into structured stages
   const consentEvent = events.find((e) => e.action === 'Consent granted');
@@ -406,6 +410,88 @@ export function ApplicationTimeline({ app, events, serviceDef, ctx: c, activeCon
           </div>
         )}
       </div>
+
+      {/* RTS Statutory Delivery & Escalation Section */}
+      <section className="panel section-gap rts-timeline-section" aria-labelledby="rts-timeline-heading" style={{ borderLeft: '4px solid #0f766e' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '0.75rem' }}>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
+              <Scale size={18} style={{ color: '#0f766e' }} />
+              <strong>{t('Statutory Service Delivery (RTS Act 2015)')}</strong>
+            </div>
+            <h4 id="rts-timeline-heading" style={{ margin: 0, fontSize: '1rem', color: '#0f766e' }}>
+              {t(rtsDeadline.serviceName)}
+            </h4>
+            <p className="subtext" style={{ margin: '0.25rem 0 0 0' }}>
+              {rtsDeadline.officialSource.notificationRef} · {rtsDeadline.officialSource.relevantSection}
+            </p>
+          </div>
+          <div>
+            <Badge status={rtsDeadline.status === 'on_track' ? 'success' : rtsDeadline.status === 'overdue' ? 'rejected' : ['approaching', 'deadline_reached'].includes(rtsDeadline.status) ? 'review' : 'neutral'}>
+              {t(rtsDeadline.statusLabel)}
+            </Badge>
+          </div>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.75rem', background: '#f8fafc', padding: '0.75rem 1rem', borderRadius: '6px', fontSize: '0.85rem' }}>
+          <div>
+            <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.75rem' }}>{t('Stipulated Time Limit')}</span>
+            <strong>{rtsDeadline.stipulatedDays ? `${rtsDeadline.stipulatedDays} ${t(rtsDeadline.dayType === 'working' ? 'working days' : 'days')}` : t('Not Applicable')}</strong>
+          </div>
+          <div>
+            <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.75rem' }}>{t('Expected Decision Date')}</span>
+            <strong>{rtsDeadline.dueDateFormatted || t('Timeline Not Verified')}</strong>
+          </div>
+          <div>
+            <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.75rem' }}>{t('Responsible Authority')}</span>
+            <strong>{t(rtsDeadline.designatedOfficer)}</strong>
+          </div>
+          <div>
+            <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.75rem' }}>{t('First Appellate Authority')}</span>
+            <strong>{t(rtsDeadline.firstAppellateAuthority)}</strong>
+          </div>
+        </div>
+
+        <p className="subtext" style={{ marginTop: '0.75rem', marginBottom: '0.75rem' }}>
+          {rtsDeadline.calculationExplanation}
+        </p>
+
+        {rtsDeadline.isEligibleForFirstAppeal && (
+          <div className="note warn section-gap" style={{ margin: '0.75rem 0 0.5rem 0', borderColor: '#d97706', background: '#fffbeb' }}>
+            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-start' }}>
+              <AlertTriangle size={18} style={{ color: '#d97706', flexShrink: 0, marginTop: '2px' }} />
+              <div>
+                <strong>{t('Eligible for Appeal')}</strong>
+                <p style={{ margin: '0.25rem 0 0.5rem 0', fontSize: '0.85rem' }}>
+                  {t('First Appeal available under Section 9(1) within 30 days of deadline expiry or rejection.')}
+                </p>
+                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                  <a
+                    href="https://aaplesarkar.mahaonline.gov.in"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn primary small"
+                  >
+                    {t('File First Appeal on Aaple Sarkar')} <ExternalLink size={13} style={{ marginLeft: '4px' }} />
+                  </a>
+                  <button type="button" className="btn small" onClick={() => c.move('rts')}>
+                    {t('Open RTS Escalation Assistant')}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {!rtsDeadline.isEligibleForFirstAppeal && (
+          <div style={{ marginTop: '0.5rem' }}>
+            <button type="button" className="btn small outline" onClick={() => c.move('rts')}>
+              <Clock size={14} style={{ marginRight: '4px' }} />
+              {t('Open RTS Escalation Assistant')}
+            </button>
+          </div>
+        )}
+      </section>
 
       {/* Action Footer */}
       <div className="actions section-gap">

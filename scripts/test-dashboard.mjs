@@ -27,6 +27,8 @@ new Function('require', 'exports', 'module', compiled)(
       ? loadLocalTs('app/recommendation-translations.ts')
       : name === './journey-translations'
       ? loadLocalTs('app/journey-translations.ts')
+      : name === './rts-translations'
+      ? loadLocalTs('app/rts-translations.ts')
       : require(name),
   mod.exports,
   mod

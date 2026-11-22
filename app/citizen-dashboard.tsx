@@ -29,6 +29,7 @@ import { useLanguage } from './i18n';
 import { Badge } from './workspace';
 import { getServiceName } from './portal';
 import { getAllServices, serviceCategories, services, type Service } from '@/lib/services';
+import { getRtsSummary } from '@/lib/rts';
 import type { AuditRecord, WorkspaceContext } from '@/lib/types';
 import { getStageInfo, type StageInfo } from '@/lib/dashboard-helpers';
 
@@ -64,6 +65,7 @@ export function CitizenDashboard({ ctx: c, query, clearSearch }: CitizenDashboar
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
   const apps = useMemo(() => c.workspace.applications || [], [c.workspace.applications]);
+  const rtsSummary = useMemo(() => getRtsSummary(apps), [apps]);
   const audits = useMemo(() => c.workspace.audit || [], [c.workspace.audit]);
   const user = c.workspace.user;
 
@@ -321,6 +323,67 @@ export function CitizenDashboard({ ctx: c, query, clearSearch }: CitizenDashboar
         </button>
       </section>
 
+      {/* SECTION RTS: RTS Statutory Deadline Alerts Banner */}
+      {(rtsSummary.metrics.overdueCount > 0 || rtsSummary.metrics.approachingCount > 0) && (
+        <section
+          className="recommendation-banner rts-alert-banner"
+          aria-label={t('RTS Deadline Alerts')}
+          style={{
+            marginTop: '-12px',
+            borderLeftColor: rtsSummary.metrics.overdueCount > 0 ? '#ef4444' : '#f59e0b',
+            background: rtsSummary.metrics.overdueCount > 0 ? '#fef2f2' : '#fffbeb',
+          }}
+        >
+          <div className="rec-banner-content">
+            <div
+              className="rec-banner-icon"
+              style={{
+                background: rtsSummary.metrics.overdueCount > 0 ? '#fee2e2' : '#fef3c7',
+                color: rtsSummary.metrics.overdueCount > 0 ? '#dc2626' : '#d97706',
+              }}
+            >
+              <Clock size={24} />
+            </div>
+            <div>
+              <h3
+                style={{
+                  margin: '0 0 4px 0',
+                  fontSize: '1.05rem',
+                  color: rtsSummary.metrics.overdueCount > 0 ? '#991b1b' : '#92400e',
+                  fontFamily: 'var(--heading-font)',
+                }}
+              >
+                {t('RTS Deadline Alerts')} ({n(rtsSummary.metrics.overdueCount + rtsSummary.metrics.approachingCount)})
+              </h3>
+              <p
+                style={{
+                  margin: 0,
+                  fontSize: '0.875rem',
+                  color: rtsSummary.metrics.overdueCount > 0 ? '#7f1d1d' : '#78350f',
+                  lineHeight: 1.45,
+                }}
+              >
+                {t('You have {count} application(s) requiring attention under Maharashtra RTS timelines.', {
+                  count: rtsSummary.metrics.overdueCount + rtsSummary.metrics.approachingCount,
+                })}
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            className="btn primary"
+            style={{
+              background: rtsSummary.metrics.overdueCount > 0 ? '#dc2626' : '#d97706',
+              borderColor: rtsSummary.metrics.overdueCount > 0 ? '#dc2626' : '#d97706',
+            }}
+            onClick={() => c.move('rts')}
+          >
+            <Clock size={16} style={{ marginRight: '6px' }} />
+            {t('View RTS Deadline Assistant')}
+          </button>
+        </section>
+      )}
+
       {/* SECTION B: Application Summary Cards */}
       <section className="stats dashboard-summary-cards" aria-label={t('Total Applications')}>
         <button
@@ -510,6 +573,22 @@ export function CitizenDashboard({ ctx: c, query, clearSearch }: CitizenDashboar
             </div>
             <ArrowRight size={16} className="quick-action-arrow" />
           </button>
+
+          <button
+            type="button"
+            className="quick-action-card tone-5"
+            data-action="rts"
+            onClick={() => c.move('rts')}
+          >
+            <div className="quick-action-icon" style={{ background: '#ecfdf5', color: '#0f766e' }}>
+              <Clock size={22} />
+            </div>
+            <div className="quick-action-body">
+              <strong>{t('RTS Deadlines & Escalation')}</strong>
+              <small>{t('Check Maharashtra RTS 2015 statutory timelines and file appeals.')}</small>
+            </div>
+            <ArrowRight size={16} className="quick-action-arrow" />
+          </button>
         </div>
       </section>
 
@@ -694,6 +773,17 @@ export function CitizenDashboard({ ctx: c, query, clearSearch }: CitizenDashboar
                       >
                         <Route size={14} style={{ marginRight: '4px' }} />
                         {t('View in Journey')}
+                      </button>
+
+                      <button
+                        type="button"
+                        className="btn small outline"
+                        disabled={c.busy}
+                        onClick={() => c.move('rts')}
+                        title={t('View RTS Status')}
+                      >
+                        <Clock size={14} style={{ marginRight: '4px' }} />
+                        {t('View RTS Status')}
                       </button>
                     </div>
                   </article>
