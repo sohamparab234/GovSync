@@ -413,6 +413,8 @@ new Function(
       ? loadLocalTs('app/journey-translations.ts')
       : name === './rts-translations'
       ? loadLocalTs('app/rts-translations.ts')
+      : name === './grievance-translations'
+      ? loadLocalTs('app/grievance-translations.ts')
       : require(name),
   i18nMod.exports,
   i18nMod

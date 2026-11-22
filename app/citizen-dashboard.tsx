@@ -23,6 +23,7 @@ import {
   RefreshCw,
   Sparkles,
   Route,
+  LifeBuoy,
 } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useLanguage } from './i18n';
@@ -589,6 +590,22 @@ export function CitizenDashboard({ ctx: c, query, clearSearch }: CitizenDashboar
             </div>
             <ArrowRight size={16} className="quick-action-arrow" />
           </button>
+
+          <button
+            type="button"
+            className="quick-action-card tone-6"
+            data-action="grievances"
+            onClick={() => c.move('grievances')}
+          >
+            <div className="quick-action-icon" style={{ background: '#fef2f2', color: '#B94220' }}>
+              <LifeBuoy size={22} />
+            </div>
+            <div className="quick-action-body">
+              <strong>{t('Unified Grievance Centre')}</strong>
+              <small>{t('Track and manage grievances regarding public services.')}</small>
+            </div>
+            <ArrowRight size={16} className="quick-action-arrow" />
+          </button>
         </div>
       </section>
 
@@ -784,6 +801,17 @@ export function CitizenDashboard({ ctx: c, query, clearSearch }: CitizenDashboar
                       >
                         <Clock size={14} style={{ marginRight: '4px' }} />
                         {t('View RTS Status')}
+                      </button>
+
+                      <button
+                        type="button"
+                        className="btn small outline"
+                        disabled={c.busy}
+                        onClick={() => c.move('grievances')}
+                        title={t('Lodge Grievance')}
+                      >
+                        <LifeBuoy size={14} style={{ marginRight: '4px' }} />
+                        {t('Lodge Grievance')}
                       </button>
                     </div>
                   </article>

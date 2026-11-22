@@ -3,9 +3,11 @@ import {allDepartments,citizens,sampleRecord,normalize,serviceDepartments,type D
 import {services,type Service} from '@/lib/services';
 import {evaluateApplication} from '@/lib/engine';
 import {trackedStatuses} from '@/lib/residence';
-import {database,application,consent,event,body,reply,guarded,ApiError} from '@/lib/server';
+import {database,application,consent,event,body,reply,guarded,ApiError,initGrievanceTables} from '@/lib/server';
 import type {ApplicationRecord} from '@/lib/types';
+import {generateGrievanceReference,getGrievanceSummary,getRtsAdvisoryForGrievance,validateGrievanceInput,validatePiiSafety,type GrievanceRecord,type GrievanceEventRecord} from '@/lib/grievances';
 export const dynamic='force-dynamic';
+const sanitizeGrievance=(g:GrievanceRecord,isAdmin:boolean):GrievanceRecord=>(isAdmin?g:{...g,admin_note:null});
 const serviceOf=(app:{service?:string}):Service=>((app.service&&app.service in services)?(app.service as Service):'scholarship');
 async function recordsFor(app:{id:string;service?:string}) {
  const rows=await database().prepare('SELECT department,normalized FROM checks WHERE application_id = ?').bind(app.id).all<{department:Department;normalized:string}>();
@@ -33,8 +35,47 @@ export async function GET(request:Request){return guarded(async()=>{
   return reply({application:app,events:events.results});
  }
  if(path[0]==='workspace'){
-  const [apps,logs]=await Promise.all(actor.role==='admin'?[db.prepare("SELECT * FROM applications WHERE status IN ('submitted','clarification','approved','rejected') ORDER BY submitted_at DESC LIMIT 100").all(),db.prepare("SELECT a.* FROM audit a JOIN applications p ON p.id=a.application_id WHERE p.status IN ('submitted','clarification','approved','rejected') ORDER BY a.created_at DESC LIMIT 200").all()]:[db.prepare('SELECT * FROM applications WHERE owner = ? ORDER BY created_at DESC LIMIT 100').bind(user).all(),db.prepare('SELECT * FROM audit WHERE owner = ? ORDER BY created_at DESC LIMIT 200').bind(user).all()]);
-  return reply({user:actor,applications:apps.results,audit:logs.results,citizens});
+  await initGrievanceTables(db);
+  const [apps,logs,grvs]=await Promise.all(actor.role==='admin'?[
+   db.prepare("SELECT * FROM applications WHERE status IN ('submitted','clarification','approved','rejected') ORDER BY submitted_at DESC LIMIT 100").all(),
+   db.prepare("SELECT a.* FROM audit a JOIN applications p ON p.id=a.application_id WHERE p.status IN ('submitted','clarification','approved','rejected') ORDER BY a.created_at DESC LIMIT 200").all(),
+   db.prepare("SELECT * FROM grievances ORDER BY created_at DESC LIMIT 100").all()
+  ]:[
+   db.prepare('SELECT * FROM applications WHERE owner = ? ORDER BY created_at DESC LIMIT 100').bind(user).all(),
+   db.prepare('SELECT * FROM audit WHERE owner = ? ORDER BY created_at DESC LIMIT 200').bind(user).all(),
+   db.prepare('SELECT * FROM grievances WHERE owner = ? ORDER BY created_at DESC LIMIT 100').bind(user).all()
+  ]);
+  return reply({user:actor,applications:apps.results,audit:logs.results,citizens,grievances:(grvs.results as unknown as GrievanceRecord[]).map(g=>sanitizeGrievance(g,actor.role==='admin'))});
+ }
+ if(path[0]==='grievances'){
+  await initGrievanceTables(db);
+  if(!path[1]){
+   const queryApp=url.searchParams.get('applicationId'),queryRef=url.searchParams.get('referenceNumber');
+   let rows;
+   if(queryRef){
+    rows=await db.prepare('SELECT * FROM grievances WHERE reference_number = ?').bind(queryRef).all<GrievanceRecord>();
+    if(actor.role!=='admin'){
+     rows.results=rows.results.filter(r=>r.owner===user);
+    }
+   }else if(actor.role==='admin'){
+    rows=queryApp?await db.prepare('SELECT * FROM grievances WHERE application_id = ? ORDER BY created_at DESC').bind(queryApp).all<GrievanceRecord>():await db.prepare('SELECT * FROM grievances ORDER BY created_at DESC LIMIT 200').all<GrievanceRecord>();
+   }else{
+    rows=queryApp?await db.prepare('SELECT * FROM grievances WHERE owner = ? AND application_id = ? ORDER BY created_at DESC').bind(user,queryApp).all<GrievanceRecord>():await db.prepare('SELECT * FROM grievances WHERE owner = ? ORDER BY created_at DESC').bind(user).all<GrievanceRecord>();
+   }
+   const summary=getGrievanceSummary(rows.results);
+   return reply({grievances:rows.results.map(g=>sanitizeGrievance(g,actor.role==='admin')),summary});
+  }
+  const grievanceId=path[1];
+  const g=await db.prepare('SELECT * FROM grievances WHERE id = ?').bind(grievanceId).first<GrievanceRecord>();
+  if(!g)throw new ApiError(404,'Grievance record not found.');
+  if(actor.role!=='admin'&&g.owner!==user)throw new ApiError(403,'Access denied.');
+  const events=await db.prepare('SELECT * FROM grievance_events WHERE grievance_id = ? ORDER BY created_at ASC').bind(g.id).all<GrievanceEventRecord>();
+  let linkedApp:ApplicationRecord|null=null,rtsAdvisory=null;
+  if(g.application_id){
+   linkedApp=await db.prepare('SELECT * FROM applications WHERE id = ?').bind(g.application_id).first<ApplicationRecord>();
+   if(linkedApp)rtsAdvisory=getRtsAdvisoryForGrievance(linkedApp);
+  }
+  return reply({grievance:sanitizeGrievance(g,actor.role==='admin'),events:events.results,application:linkedApp,rtsAdvisory});
  }
  if(path[0]==='applications'&&path[1]){
   const app=actor.role==='admin'?await db.prepare('SELECT * FROM applications WHERE id=?').bind(path[1]).first<ApplicationRecord>():await application(path[1],user);
@@ -86,6 +127,100 @@ export async function POST(request:Request){return guarded(async()=>{
   const logged=await db.prepare('SELECT id FROM audit WHERE id=?').bind(auditId).first();
   if(!logged)throw new ApiError(409,'Another officer has already reviewed this application. Refresh the queue.');
   return reply({application:await application(app.id,app.owner)});
+ }
+ if(path[0]==='admin'&&path[1]==='grievances'&&path[2]&&path[3]==='action'){
+  if(actor.role!=='admin')throw new ApiError(403,'Only administrators can perform staff actions on grievances.');
+  await initGrievanceTables(db);
+  const g=await db.prepare('SELECT * FROM grievances WHERE id=?').bind(path[2]).first<GrievanceRecord>();
+  if(!g)throw new ApiError(404,'Grievance record not found.');
+  const nextStatus=data.status as string;
+  const validAdminStatuses=['under_review','information_required','response_provided','resolved','closed'];
+  if(!validAdminStatuses.includes(nextStatus))throw new ApiError(400,'Choose a valid grievance status.');
+  const adminNote=typeof data.adminNote==='string'?data.adminNote.trim():(g.admin_note||null);
+  const resolutionSummary=typeof data.resolutionSummary==='string'?data.resolutionSummary.trim():(g.resolution_summary||null);
+  const details=typeof data.details==='string'&&data.details.trim()?data.details.trim():(resolutionSummary||`Status updated to ${nextStatus}`);
+  const now=new Date().toISOString();
+  const resolvedAt=(nextStatus==='resolved'||nextStatus==='closed')?(g.resolved_at||now):null;
+  await db.batch([
+   db.prepare('UPDATE grievances SET status = ?, admin_note = ?, resolution_summary = ?, updated_at = ?, resolved_at = ? WHERE id = ?').bind(nextStatus,adminNote,resolutionSummary,now,resolvedAt,g.id),
+   db.prepare('INSERT INTO grievance_events (id,grievance_id,action,actor,actor_role,details,created_at) VALUES (?,?,?,?,?,?,?)').bind(crypto.randomUUID(),g.id,`Status updated to ${nextStatus}`,actor.name,'admin',details,now),
+   event(user,g.application_id,'Grievance administrative update','success',`Officer ${actor.name} updated ${g.reference_number} to ${nextStatus}`,g.department)
+  ]);
+  const updated=await db.prepare('SELECT * FROM grievances WHERE id=?').bind(g.id).first<GrievanceRecord>();
+  const events=await db.prepare('SELECT * FROM grievance_events WHERE grievance_id=? ORDER BY created_at ASC').bind(g.id).all<GrievanceEventRecord>();
+  return reply({grievance:updated,events:events.results});
+ }
+ if(path[0]==='grievances'&&path[1]&&path[2]==='respond'){
+  await initGrievanceTables(db);
+  const g=await db.prepare('SELECT * FROM grievances WHERE id=?').bind(path[1]).first<GrievanceRecord>();
+  if(!g)throw new ApiError(404,'Grievance record not found.');
+  if(actor.role!=='admin'&&g.owner!==user)throw new ApiError(403,'Access denied.');
+  if(g.status==='closed')throw new ApiError(409,'Cannot reply to a closed grievance.');
+  const responseText=typeof data.response==='string'?data.response.trim():'';
+  if(responseText.length<10||responseText.length>2000)throw new ApiError(400,'Clarification response must be between 10 and 2,000 characters.');
+  const pii=validatePiiSafety(responseText);
+  if(!pii.safe)throw new ApiError(400,pii.error||'Invalid clarification text.');
+  const now=new Date().toISOString();
+  await db.batch([
+   db.prepare("UPDATE grievances SET status = 'response_provided', citizen_response = ?, updated_at = ? WHERE id = ?").bind(responseText,now,g.id),
+   db.prepare("INSERT INTO grievance_events (id,grievance_id,action,actor,actor_role,details,created_at) VALUES (?,?,?,?,?,?,?)").bind(crypto.randomUUID(),g.id,'Citizen clarification provided',actor.name,actor.role,responseText,now),
+   event(user,g.application_id,'Grievance clarification','success',`Clarification provided for ${g.reference_number}`,g.department)
+  ]);
+  const updated=await db.prepare('SELECT * FROM grievances WHERE id=?').bind(g.id).first<GrievanceRecord>();
+  const events=await db.prepare('SELECT * FROM grievance_events WHERE grievance_id=? ORDER BY created_at ASC').bind(g.id).all<GrievanceEventRecord>();
+  return reply({grievance:sanitizeGrievance(updated!,actor.role==='admin'),events:events.results});
+ }
+ if(path[0]==='grievances'&&path[1]&&path[2]==='close'){
+  await initGrievanceTables(db);
+  const g=await db.prepare('SELECT * FROM grievances WHERE id=?').bind(path[1]).first<GrievanceRecord>();
+  if(!g)throw new ApiError(404,'Grievance record not found.');
+  if(actor.role!=='admin'&&g.owner!==user)throw new ApiError(403,'Access denied.');
+  if(g.status==='closed')return reply({grievance:g});
+  const now=new Date().toISOString();
+  const closer=actor.role==='admin'?'officer':'citizen';
+  await db.batch([
+   db.prepare("UPDATE grievances SET status = 'closed', updated_at = ?, resolved_at = COALESCE(resolved_at, ?) WHERE id = ?").bind(now,now,g.id),
+   db.prepare("INSERT INTO grievance_events (id,grievance_id,action,actor,actor_role,details,created_at) VALUES (?,?,?,?,?,?,?)").bind(crypto.randomUUID(),g.id,`Grievance closed by ${closer}`,actor.name,actor.role,`Ticket concluded by ${closer}.`,now),
+   event(user,g.application_id,'Grievance closed','success',`Closed ${g.reference_number}`,g.department)
+  ]);
+  const updated=await db.prepare('SELECT * FROM grievances WHERE id=?').bind(g.id).first<GrievanceRecord>();
+  const events=await db.prepare('SELECT * FROM grievance_events WHERE grievance_id=? ORDER BY created_at ASC').bind(g.id).all<GrievanceEventRecord>();
+  return reply({grievance:sanitizeGrievance(updated!,actor.role==='admin'),events:events.results});
+ }
+ if(path[0]==='grievances'&&!path[1]){
+  await initGrievanceTables(db);
+  const val=validateGrievanceInput(data);
+  if(!val.valid)throw new ApiError(400,val.error||'Invalid grievance input.');
+  const recent=await db.prepare("SELECT id FROM grievances WHERE owner = ? AND category = ? AND subject = ? AND created_at > ?").bind(user,data.category,data.subject,new Date(Date.now()-30000).toISOString()).first();
+  if(recent)throw new ApiError(409,'A grievance with this subject was recently submitted. Please wait before resubmitting.');
+  let appId:string|null=null,serviceName:string|null=typeof data.service==='string'?data.service:null,departmentName:string|null=typeof data.department==='string'?data.department:null,departmentVerified=0;
+  if(data.applicationId&&typeof data.applicationId==='string'){
+   const linked=await db.prepare('SELECT * FROM applications WHERE id=?').bind(data.applicationId).first<ApplicationRecord>();
+   if(linked){
+    if(actor.role!=='admin'&&linked.owner!==user)throw new ApiError(403,'Cannot link an application belonging to another citizen.');
+    appId=linked.id;
+    serviceName=linked.service;
+    const def=services[linked.service as Service];
+    departmentName=def?def.department:'Government Department';
+    departmentVerified=1;
+   }
+  }else if(serviceName&&(serviceName in services)){
+   departmentName=services[serviceName as Service]?.department||departmentName||'Government Department';
+   departmentVerified=1;
+  }else if(departmentName){
+   departmentVerified=0;
+  }else{
+   departmentName='Department not verified';
+   departmentVerified=0;
+  }
+  const id=crypto.randomUUID(),ref=generateGrievanceReference(),now=new Date().toISOString(),citizenId=actor.citizenId||(data.citizenId as string)||'CITIZEN';
+  await db.batch([
+   db.prepare(`INSERT INTO grievances (id,reference_number,owner,citizen_id,category,subject,description,application_id,service,department,department_verified,status,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)`).bind(id,ref,user,citizenId,data.category,(data.subject as string).trim(),(data.description as string).trim(),appId,serviceName,departmentName,departmentVerified,'submitted',now,now),
+   db.prepare(`INSERT INTO grievance_events (id,grievance_id,action,actor,actor_role,details,created_at) VALUES (?,?,?,?,?,?,?)`).bind(crypto.randomUUID(),id,'Grievance submitted',actor.name,actor.role,'Initial grievance recorded in GovSync citizen coordination desk.',now),
+   event(user,appId,'Grievance submitted','success',`Reference: ${ref}; Category: ${data.category}`,departmentName)
+  ]);
+  const created=await db.prepare('SELECT * FROM grievances WHERE id=?').bind(id).first<GrievanceRecord>();
+  return reply({grievance:sanitizeGrievance(created!,actor.role==='admin')},201);
  }
  if(actor.role!=='citizen')throw new ApiError(403,'This action is available to citizen accounts only.');
  if(path[0]==='applications'&&!path[1]){

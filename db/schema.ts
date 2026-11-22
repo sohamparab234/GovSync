@@ -28,3 +28,38 @@ export const audit=sqliteTable('audit',{
  index('idx_audit_owner_created').on(t.owner,t.createdAt),
  index('idx_audit_application_id').on(t.applicationId),
 ]);
+export const grievances=sqliteTable('grievances',{
+ id:text('id').primaryKey(),
+ referenceNumber:text('reference_number').notNull().unique(),
+ owner:text('owner').notNull(),
+ citizenId:text('citizen_id').notNull(),
+ category:text('category').notNull(),
+ subject:text('subject').notNull(),
+ description:text('description').notNull(),
+ applicationId:text('application_id'),
+ service:text('service'),
+ department:text('department'),
+ departmentVerified:integer('department_verified').notNull().default(1),
+ status:text('status').notNull().default('submitted'),
+ citizenResponse:text('citizen_response'),
+ adminNote:text('admin_note'),
+ resolutionSummary:text('resolution_summary'),
+ createdAt:text('created_at').notNull(),
+ updatedAt:text('updated_at').notNull(),
+ resolvedAt:text('resolved_at'),
+},t=>[
+ index('idx_grievances_owner').on(t.owner),
+ index('idx_grievances_app').on(t.applicationId),
+ index('idx_grievances_status').on(t.status),
+]);
+export const grievanceEvents=sqliteTable('grievance_events',{
+ id:text('id').primaryKey(),
+ grievanceId:text('grievance_id').notNull().references(()=>grievances.id),
+ action:text('action').notNull(),
+ actor:text('actor').notNull(),
+ actorRole:text('actor_role').notNull(),
+ details:text('details').notNull(),
+ createdAt:text('created_at').notNull(),
+},t=>[
+ index('idx_grievance_events_grievance_id').on(t.grievanceId),
+]);

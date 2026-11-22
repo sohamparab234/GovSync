@@ -89,6 +89,7 @@ export interface WorkspaceData {
   applications: ApplicationRecord[];
   audit: AuditRecord[];
   citizens: Array<{ id: string; name: string; description: string; initials: string }>;
+  grievances?: import('./grievances').GrievanceRecord[];
 }
 
 export interface AdminMappingData {

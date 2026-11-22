@@ -8,3 +8,47 @@ export function event(user:string,appId:string|null,action:string,outcome:string
 export async function body(request:Request){try{const text=await request.text();if(text.length>12000)throw new Error();const value=JSON.parse(text);if(!value||typeof value!=='object'||Array.isArray(value))throw new Error();return value;}catch{throw new ApiError(400,'A valid JSON request body is required (maximum 12 KB).');}}
 export function reply(data:unknown,status=200){return Response.json(data,{status,headers:{'Cache-Control':'no-store'}});}
 export async function guarded(fn:()=>Promise<Response>){try{return await fn();}catch(e){if(e instanceof ApiError)return reply({error:e.message},e.status);console.error('GovSync request failed',e);return reply({error:'The service could not complete this request. Your saved application is retained. Please retry.'},503);}}
+let grievanceTablesInitialized=false;
+export async function initGrievanceTables(db:ReturnType<typeof database>){
+ if(grievanceTablesInitialized)return;
+ try{
+  await db.batch([
+   db.prepare(`CREATE TABLE IF NOT EXISTS grievances (
+    id TEXT PRIMARY KEY,
+    reference_number TEXT NOT NULL UNIQUE,
+    owner TEXT NOT NULL,
+    citizen_id TEXT NOT NULL,
+    category TEXT NOT NULL,
+    subject TEXT NOT NULL,
+    description TEXT NOT NULL,
+    application_id TEXT,
+    service TEXT,
+    department TEXT,
+    department_verified INTEGER DEFAULT 1 NOT NULL,
+    status TEXT DEFAULT 'submitted' NOT NULL,
+    citizen_response TEXT,
+    admin_note TEXT,
+    resolution_summary TEXT,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    resolved_at TEXT
+   )`),
+   db.prepare(`CREATE INDEX IF NOT EXISTS idx_grievances_owner ON grievances (owner)`),
+   db.prepare(`CREATE INDEX IF NOT EXISTS idx_grievances_app ON grievances (application_id)`),
+   db.prepare(`CREATE INDEX IF NOT EXISTS idx_grievances_status ON grievances (status)`),
+   db.prepare(`CREATE TABLE IF NOT EXISTS grievance_events (
+    id TEXT PRIMARY KEY,
+    grievance_id TEXT NOT NULL,
+    action TEXT NOT NULL,
+    actor TEXT NOT NULL,
+    actor_role TEXT NOT NULL,
+    details TEXT NOT NULL,
+    created_at TEXT NOT NULL
+   )`),
+   db.prepare(`CREATE INDEX IF NOT EXISTS idx_grievance_events_grievance_id ON grievance_events (grievance_id)`)
+  ]);
+  grievanceTablesInitialized=true;
+ }catch(err){
+  console.warn('Grievance tables init check:',err);
+ }
+}

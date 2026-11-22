@@ -295,6 +295,8 @@ console.log('14. Testing English, Hindi, and Marathi translation completeness...
         ? loadLocalTs('app/journey-translations.ts')
         : name === './rts-translations'
         ? loadLocalTs('app/rts-translations.ts')
+        : name === './grievance-translations'
+        ? loadLocalTs('app/grievance-translations.ts')
         : require(name),
     mod.exports,
     mod

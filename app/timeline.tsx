@@ -13,6 +13,7 @@ import {
   ChevronRight,
   Scale,
   ExternalLink,
+  LifeBuoy,
 } from 'lucide-react';
 import { useLanguage } from './i18n';
 import { Badge, download } from './workspace';
@@ -495,6 +496,13 @@ export function ApplicationTimeline({ app, events, serviceDef, ctx: c, activeCon
 
       {/* Action Footer */}
       <div className="actions section-gap">
+        <button
+          type="button"
+          className="btn"
+          onClick={() => c.move('grievances')}
+        >
+          <LifeBuoy size={15} style={{ marginRight: '4px' }} /> {t('Lodge Grievance')}
+        </button>
         <button
           className="btn"
           onClick={() => download('GovSync-' + app.id + '-audit.json', { application: app, timeline: events, notice: 'DEMONSTRATION ONLY' })}

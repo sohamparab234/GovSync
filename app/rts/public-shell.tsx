@@ -76,6 +76,9 @@ function PublicRtsContent() {
           <Link className="nav-item" href="/schemes">
             {t('Scheme Finder')}
           </Link>
+          <Link className="nav-item" href="/grievances">
+            {t('Grievance Centre')}
+          </Link>
           <Link className="nav-item" href="/">
             {t('Citizen portal')}
           </Link>
@@ -123,6 +126,7 @@ function PublicRtsContent() {
             <Link href="/journeys">{t('Service Journeys')}</Link>
             <Link href="/recommendations">{t('Recommendations')}</Link>
             <Link href="/schemes">{t('Scheme Finder')}</Link>
+            <Link href="/grievances">{t('Grievance Centre')}</Link>
             <Link href="/">{t('Citizen portal')}</Link>
           </div>
         </div>
