@@ -79,6 +79,9 @@ function PublicRtsContent() {
           <Link className="nav-item" href="/grievances">
             {t('Grievance Centre')}
           </Link>
+          <Link className="nav-item" href="/directory">
+            {t('Directory')}
+          </Link>
           <Link className="nav-item" href="/">
             {t('Citizen portal')}
           </Link>

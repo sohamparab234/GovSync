@@ -105,6 +105,9 @@ function PublicGrievanceContent() {
           <Link className="nav-item active" href="/grievances" aria-current="page">
             {t('Grievance Centre')}
           </Link>
+          <Link className="nav-item" href="/directory">
+            {t('Directory')}
+          </Link>
           <Link className="nav-item" href="/rts">
             {t('RTS Deadlines')}
           </Link>

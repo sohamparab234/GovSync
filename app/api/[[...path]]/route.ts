@@ -6,6 +6,7 @@ import {trackedStatuses} from '@/lib/residence';
 import {database,application,consent,event,body,reply,guarded,ApiError,initGrievanceTables} from '@/lib/server';
 import type {ApplicationRecord} from '@/lib/types';
 import {generateGrievanceReference,getGrievanceSummary,getRtsAdvisoryForGrievance,validateGrievanceInput,validatePiiSafety,type GrievanceRecord,type GrievanceEventRecord} from '@/lib/grievances';
+import {filterGovernmentOffices,VERIFIED_GOVERNMENT_OFFICES,MAHARASHTRA_DISTRICTS_DIRECTORY,GOVERNMENT_DEPARTMENTS,ALL_OFFICE_CATEGORIES} from '@/lib/directory';
 export const dynamic='force-dynamic';
 const sanitizeGrievance=(g:GrievanceRecord,isAdmin:boolean):GrievanceRecord=>(isAdmin?g:{...g,admin_note:null});
 const serviceOf=(app:{service?:string}):Service=>((app.service&&app.service in services)?(app.service as Service):'scholarship');
@@ -19,6 +20,16 @@ async function recordsFor(app:{id:string;service?:string}) {
 export async function GET(request:Request){return guarded(async()=>{
  const url=new URL(request.url),path=url.pathname.replace(/^\/api\/?/,'').split('/'),db=database();
  if(path[0]==='auth')return authRoute(request,path[1]);
+ if(path[0]==='directory'){
+  const query=url.searchParams.get('query')||undefined;
+  const district=url.searchParams.get('district')||undefined;
+  const taluka=url.searchParams.get('taluka')||undefined;
+  const department=url.searchParams.get('department')||undefined;
+  const officeCategory=url.searchParams.get('officeCategory')||undefined;
+  const service=url.searchParams.get('service')||undefined;
+  const filtered=filterGovernmentOffices(VERIFIED_GOVERNMENT_OFFICES,{query,district,taluka,department,officeCategory,service});
+  return reply({districts:MAHARASHTRA_DISTRICTS_DIRECTORY,departments:GOVERNMENT_DEPARTMENTS,categories:ALL_OFFICE_CATEGORIES,offices:filtered,totalOffices:VERIFIED_GOVERNMENT_OFFICES.length,matchingOffices:filtered.length});
+ }
  const actor=await account(request),user=actor.id;
  if(path[0]==='admin'&&path[1]==='mappings'&&path[2]){
   if(actor.role!=='admin')throw new ApiError(403,'Only administrators can view submitted application mappings.');

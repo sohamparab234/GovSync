@@ -31,6 +31,8 @@ new Function('require', 'exports', 'module', compiled)(
       ? loadLocalTs('app/rts-translations.ts')
       : name === './grievance-translations'
       ? loadLocalTs('app/grievance-translations.ts')
+      : name === './directory-translations'
+      ? loadLocalTs('app/directory-translations.ts')
       : require(name),
   mod.exports,
   mod

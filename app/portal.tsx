@@ -29,7 +29,7 @@ export function PortalHeader({ view, mode, move, home, logout, busy, user }: Por
   useEffect(() => { document.documentElement.style.fontSize = size + '%'; }, [size]);
   const links = mode === 'admin'
     ? [['dashboard', 'Overview'], ['audit', 'Activity'], ['mapping', 'Data mappings'], ['apis', 'API registry'], ['guide', 'Developer guide']]
-    : [['apply', 'Services'], ['rts', 'RTS Deadlines'], ['journeys', 'Service Journeys'], ['recommendations', 'Recommendations'], ['schemes', 'Scheme Finder'], ['grievances', 'Grievance Centre'], ['applications', 'My applications'], ['consent', 'Permissions'], ['audit', 'Activity'], ['resources', 'Help']];
+    : [['apply', 'Services'], ['directory', 'Directory'], ['rts', 'RTS Deadlines'], ['journeys', 'Service Journeys'], ['recommendations', 'Recommendations'], ['schemes', 'Scheme Finder'], ['grievances', 'Grievance Centre'], ['applications', 'My applications'], ['consent', 'Permissions'], ['audit', 'Activity'], ['resources', 'Help']];
 
   return (
     <>

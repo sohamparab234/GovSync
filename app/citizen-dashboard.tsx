@@ -24,6 +24,7 @@ import {
   Sparkles,
   Route,
   LifeBuoy,
+  Landmark,
 } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useLanguage } from './i18n';
@@ -603,6 +604,22 @@ export function CitizenDashboard({ ctx: c, query, clearSearch }: CitizenDashboar
             <div className="quick-action-body">
               <strong>{t('Unified Grievance Centre')}</strong>
               <small>{t('Track and manage grievances regarding public services.')}</small>
+            </div>
+            <ArrowRight size={16} className="quick-action-arrow" />
+          </button>
+
+          <button
+            type="button"
+            className="quick-action-card tone-7"
+            data-action="directory"
+            onClick={() => c.move('directory')}
+          >
+            <div className="quick-action-icon" style={{ background: '#eff6ff', color: '#1e40af' }}>
+              <Landmark size={22} />
+            </div>
+            <div className="quick-action-body">
+              <strong>{t('Government Office Directory')}</strong>
+              <small>{t("Locate district administrative offices, tahsil centers, and department contact channels across Maharashtra's 36 districts.")}</small>
             </div>
             <ArrowRight size={16} className="quick-action-arrow" />
           </button>

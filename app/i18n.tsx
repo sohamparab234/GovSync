@@ -6,6 +6,7 @@ import {recommendationTranslations} from './recommendation-translations';
 import {journeyTranslations} from './journey-translations';
 import {rtsTranslations} from './rts-translations';
 import {grievanceTranslations} from './grievance-translations';
+import {directoryTranslations} from './directory-translations';
 import {createContext,useContext,useEffect,useState} from 'react';
 export type Language='en'|'hi'|'mr';
 export const translations:Record<string,[string,string]>={
@@ -16,6 +17,7 @@ export const translations:Record<string,[string,string]>={
  ...journeyTranslations,
  ...rtsTranslations,
  ...grievanceTranslations,
+ ...directoryTranslations,
 "Select a submitted application":["जमा किया गया आवेदन चुनें","सादर केलेला अर्ज निवडा"],
 "Ration Card (PDS Security)": ["राशन कार्ड (सार्वजनिक वितरण)", "रेशन कार्ड (सार्वजनिक वितरण)"],
 "Passport Application": ["पासपोर्ट आवेदन", "पारपत्र (पासपोर्ट) अर्ज"],
