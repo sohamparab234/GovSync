@@ -7,6 +7,7 @@ import {database,application,consent,event,body,reply,guarded,ApiError,initGriev
 import type {ApplicationRecord} from '@/lib/types';
 import {generateGrievanceReference,getGrievanceSummary,getRtsAdvisoryForGrievance,validateGrievanceInput,validatePiiSafety,type GrievanceRecord,type GrievanceEventRecord} from '@/lib/grievances';
 import {filterGovernmentOffices,VERIFIED_GOVERNMENT_OFFICES,MAHARASHTRA_DISTRICTS_DIRECTORY,GOVERNMENT_DEPARTMENTS,ALL_OFFICE_CATEGORIES} from '@/lib/directory';
+import {filterAgricultureItems,VERIFIED_AGRICULTURE_ITEMS,AGRICULTURE_CATEGORIES,IMPORTANT_AGRICULTURE_PORTALS,HOW_TO_USE_STEPS} from '@/lib/agriculture';
 export const dynamic='force-dynamic';
 const sanitizeGrievance=(g:GrievanceRecord,isAdmin:boolean):GrievanceRecord=>(isAdmin?g:{...g,admin_note:null});
 const serviceOf=(app:{service?:string}):Service=>((app.service&&app.service in services)?(app.service as Service):'scholarship');
@@ -29,6 +30,15 @@ export async function GET(request:Request){return guarded(async()=>{
   const service=url.searchParams.get('service')||undefined;
   const filtered=filterGovernmentOffices(VERIFIED_GOVERNMENT_OFFICES,{query,district,taluka,department,officeCategory,service});
   return reply({districts:MAHARASHTRA_DISTRICTS_DIRECTORY,departments:GOVERNMENT_DEPARTMENTS,categories:ALL_OFFICE_CATEGORIES,offices:filtered,totalOffices:VERIFIED_GOVERNMENT_OFFICES.length,matchingOffices:filtered.length});
+ }
+ if(path[0]==='agriculture'){
+  const query=url.searchParams.get('query')||undefined;
+  const category=url.searchParams.get('category')||undefined;
+  const department=url.searchParams.get('department')||undefined;
+  const itemType=url.searchParams.get('type')||undefined;
+  const verificationStatus=url.searchParams.get('verifiedOnly')==='true'?'verified':undefined;
+  const filtered=filterAgricultureItems(VERIFIED_AGRICULTURE_ITEMS,{query,category,department,itemType,verificationStatus});
+  return reply({categories:AGRICULTURE_CATEGORIES,portals:IMPORTANT_AGRICULTURE_PORTALS,steps:HOW_TO_USE_STEPS,items:filtered,totalItems:VERIFIED_AGRICULTURE_ITEMS.length,matchingItems:filtered.length});
  }
  const actor=await account(request),user=actor.id;
  if(path[0]==='admin'&&path[1]==='mappings'&&path[2]){

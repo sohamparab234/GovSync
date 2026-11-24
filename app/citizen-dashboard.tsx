@@ -25,6 +25,7 @@ import {
   Route,
   LifeBuoy,
   Landmark,
+  Sprout,
 } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useLanguage } from './i18n';
@@ -620,6 +621,22 @@ export function CitizenDashboard({ ctx: c, query, clearSearch }: CitizenDashboar
             <div className="quick-action-body">
               <strong>{t('Government Office Directory')}</strong>
               <small>{t("Locate district administrative offices, tahsil centers, and department contact channels across Maharashtra's 36 districts.")}</small>
+            </div>
+            <ArrowRight size={16} className="quick-action-arrow" />
+          </button>
+
+          <button
+            type="button"
+            className="quick-action-card tone-8"
+            data-action="agriculture"
+            onClick={() => c.move('agriculture')}
+          >
+            <div className="quick-action-icon" style={{ background: '#f0fdf4', color: '#15803d' }}>
+              <Sprout size={22} />
+            </div>
+            <div className="quick-action-body">
+              <strong>{t('Agriculture & Farmer Service Hub')}</strong>
+              <small>{t('Find crop insurance, machinery subsidies, PM-KISAN, soil cards, and 7/12 land records.')}</small>
             </div>
             <ArrowRight size={16} className="quick-action-arrow" />
           </button>

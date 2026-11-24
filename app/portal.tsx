@@ -29,7 +29,7 @@ export function PortalHeader({ view, mode, move, home, logout, busy, user }: Por
   useEffect(() => { document.documentElement.style.fontSize = size + '%'; }, [size]);
   const links = mode === 'admin'
     ? [['dashboard', 'Overview'], ['audit', 'Activity'], ['mapping', 'Data mappings'], ['apis', 'API registry'], ['guide', 'Developer guide']]
-    : [['apply', 'Services'], ['directory', 'Directory'], ['rts', 'RTS Deadlines'], ['journeys', 'Service Journeys'], ['recommendations', 'Recommendations'], ['schemes', 'Scheme Finder'], ['grievances', 'Grievance Centre'], ['applications', 'My applications'], ['consent', 'Permissions'], ['audit', 'Activity'], ['resources', 'Help']];
+    : [['apply', 'Services'], ['agriculture', 'Agriculture'], ['directory', 'Directory'], ['rts', 'RTS Deadlines'], ['journeys', 'Service Journeys'], ['recommendations', 'Recommendations'], ['schemes', 'Scheme Finder'], ['grievances', 'Grievance Centre'], ['applications', 'My applications'], ['consent', 'Permissions'], ['audit', 'Activity'], ['resources', 'Help']];
 
   return (
     <>
@@ -129,6 +129,8 @@ export function PortalFooter({ mode, move, home }: { mode: 'citizen' | 'admin'; 
           <button onClick={home}>{t(mode === 'admin' ? 'Overview' : 'Services')}</button>
           {mode === 'citizen' && (
             <>
+              <button onClick={() => move('agriculture')}>{t('Agriculture')}</button>
+              <button onClick={() => move('directory')}>{t('Directory')}</button>
               <button onClick={() => move('rts')}>{t('RTS Deadlines')}</button>
               <button onClick={() => move('journeys')}>{t('Service Journeys')}</button>
               <button onClick={() => move('recommendations')}>{t('Recommendations')}</button>
