@@ -419,6 +419,8 @@ new Function(
       ? loadLocalTs('app/directory-translations.ts')
       : name === './agriculture-translations'
       ? loadLocalTs('app/agriculture-translations.ts')
+      : name === './transparency-translations'
+      ? loadLocalTs('app/transparency-translations.ts')
       : require(name),
   i18nMod.exports,
   i18nMod

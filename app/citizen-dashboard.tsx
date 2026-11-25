@@ -640,6 +640,22 @@ export function CitizenDashboard({ ctx: c, query, clearSearch }: CitizenDashboar
             </div>
             <ArrowRight size={16} className="quick-action-arrow" />
           </button>
+
+          <button
+            type="button"
+            className="quick-action-card tone-9"
+            data-action="transparency"
+            onClick={() => c.move('transparency')}
+          >
+            <div className="quick-action-icon" style={{ background: '#fdf4ff', color: '#9333ea' }}>
+              <ScrollText size={22} />
+            </div>
+            <div className="quick-action-body">
+              <strong>{t('Government Transparency & Updates')}</strong>
+              <small>{t('Access verified Government Resolutions (GRs), department circulars, and official public notices.')}</small>
+            </div>
+            <ArrowRight size={16} className="quick-action-arrow" />
+          </button>
         </div>
       </section>
 

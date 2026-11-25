@@ -164,6 +164,9 @@ export function PublicAgricultureContent({ embedded = false }: { embedded?: bool
               </span>
             </Link>
             <nav className="main-navigation" aria-label={t('Main navigation')}>
+              <Link className="nav-item" href="/transparency">
+                {t('Transparency')}
+              </Link>
               <Link className="nav-item active" href="/agriculture" aria-current="page">
                 {t('Agriculture')}
               </Link>
@@ -1389,6 +1392,7 @@ export function PublicAgricultureContent({ embedded = false }: { embedded?: bool
               <p>{t('Integrated government services')}</p>
             </div>
             <div className="footer-links">
+              <Link href="/transparency">{t('Transparency')}</Link>
               <Link href="/agriculture">{t('Agriculture')}</Link>
               <Link href="/directory">{t('Directory')}</Link>
               <Link href="/grievances">{t('Grievance Centre')}</Link>

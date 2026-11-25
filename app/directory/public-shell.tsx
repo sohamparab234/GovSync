@@ -838,6 +838,7 @@ export function PublicDirectoryContent() {
             <p>{t('Integrated government services')}</p>
           </div>
           <div className="footer-links">
+            <Link href="/transparency">{t('Transparency')}</Link>
             <Link href="/agriculture">{t('Agriculture')}</Link>
             <Link href="/directory">{t('Directory')}</Link>
             <Link href="/grievances">{t('Grievance Centre')}</Link>

@@ -336,6 +336,7 @@ function PublicGrievanceContent() {
             <p>{t('Integrated government services')}</p>
           </div>
           <div className="footer-links">
+            <Link href="/transparency">{t('Transparency')}</Link>
             <Link href="/agriculture">{t('Agriculture')}</Link>
             <Link href="/grievances">{t('Grievance Centre')}</Link>
             <Link href="/rts">{t('RTS Deadlines')}</Link>

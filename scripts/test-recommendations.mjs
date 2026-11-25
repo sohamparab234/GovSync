@@ -301,6 +301,8 @@ console.log('14. Testing English, Hindi, and Marathi translation completeness...
         ? loadLocalTs('app/directory-translations.ts')
         : name === './agriculture-translations'
         ? loadLocalTs('app/agriculture-translations.ts')
+        : name === './transparency-translations'
+        ? loadLocalTs('app/transparency-translations.ts')
         : require(name),
     mod.exports,
     mod

@@ -8,6 +8,8 @@ import type {ApplicationRecord} from '@/lib/types';
 import {generateGrievanceReference,getGrievanceSummary,getRtsAdvisoryForGrievance,validateGrievanceInput,validatePiiSafety,type GrievanceRecord,type GrievanceEventRecord} from '@/lib/grievances';
 import {filterGovernmentOffices,VERIFIED_GOVERNMENT_OFFICES,MAHARASHTRA_DISTRICTS_DIRECTORY,GOVERNMENT_DEPARTMENTS,ALL_OFFICE_CATEGORIES} from '@/lib/directory';
 import {filterAgricultureItems,VERIFIED_AGRICULTURE_ITEMS,AGRICULTURE_CATEGORIES,IMPORTANT_AGRICULTURE_PORTALS,HOW_TO_USE_STEPS} from '@/lib/agriculture';
+import {filterAnnouncements,VERIFIED_ANNOUNCEMENTS,TRANSPARENCY_CATEGORIES,OFFICIAL_GOVERNMENT_PORTALS,getTransparencyDepartments,getTransparencySummary,getCitizenNotifications} from '@/lib/transparency';
+import type {AuditRecord} from '@/lib/types';
 export const dynamic='force-dynamic';
 const sanitizeGrievance=(g:GrievanceRecord,isAdmin:boolean):GrievanceRecord=>(isAdmin?g:{...g,admin_note:null});
 const serviceOf=(app:{service?:string}):Service=>((app.service&&app.service in services)?(app.service as Service):'scholarship');
@@ -39,6 +41,32 @@ export async function GET(request:Request){return guarded(async()=>{
   const verificationStatus=url.searchParams.get('verifiedOnly')==='true'?'verified':undefined;
   const filtered=filterAgricultureItems(VERIFIED_AGRICULTURE_ITEMS,{query,category,department,itemType,verificationStatus});
   return reply({categories:AGRICULTURE_CATEGORIES,portals:IMPORTANT_AGRICULTURE_PORTALS,steps:HOW_TO_USE_STEPS,items:filtered,totalItems:VERIFIED_AGRICULTURE_ITEMS.length,matchingItems:filtered.length});
+ }
+ if(path[0]==='transparency'){
+  if(path[1]==='notifications'){
+   const actor=await account(request),user=actor.id;
+   await initGrievanceTables(db);
+   const [apps,logs,grvs]=await Promise.all([
+    db.prepare('SELECT * FROM applications WHERE owner = ? ORDER BY created_at DESC LIMIT 100').bind(user).all<ApplicationRecord>(),
+    db.prepare('SELECT * FROM audit WHERE owner = ? ORDER BY created_at DESC LIMIT 200').bind(user).all<AuditRecord>(),
+    db.prepare('SELECT * FROM grievances WHERE owner = ? ORDER BY created_at DESC LIMIT 100').bind(user).all<GrievanceRecord>()
+   ]);
+   const notifications=getCitizenNotifications(apps.results,logs.results,grvs.results,VERIFIED_ANNOUNCEMENTS);
+   const urgentCount=notifications.filter(n=>n.severity==='urgent').length;
+   return reply({notifications,summary:{total:notifications.length,urgent:urgentCount,citizenId:actor.citizenId||user}});
+  }
+  const query=url.searchParams.get('query')||undefined;
+  const category=url.searchParams.get('category')||undefined;
+  const department=url.searchParams.get('department')||undefined;
+  const verificationStatus=url.searchParams.get('verificationStatus')||undefined;
+  const validityStatus=url.searchParams.get('validityStatus')||undefined;
+  const serviceId=url.searchParams.get('service')||undefined;
+  const includeArchive=url.searchParams.get('includeArchive')==='true'?true:url.searchParams.get('includeArchive')==='false'?false:undefined;
+  const sortBy=(url.searchParams.get('sortBy') as 'newest'|'oldest'|'title')||'newest';
+  const filtered=filterAnnouncements(VERIFIED_ANNOUNCEMENTS,{query,category,department,verificationStatus,validityStatus,serviceId,includeArchive,sortBy});
+  const summary=getTransparencySummary(VERIFIED_ANNOUNCEMENTS);
+  const departments=getTransparencyDepartments(VERIFIED_ANNOUNCEMENTS);
+  return reply({categories:TRANSPARENCY_CATEGORIES,portals:OFFICIAL_GOVERNMENT_PORTALS,departments,summary,announcements:filtered,totalAnnouncements:VERIFIED_ANNOUNCEMENTS.length,matchingAnnouncements:filtered.length});
  }
  const actor=await account(request),user=actor.id;
  if(path[0]==='admin'&&path[1]==='mappings'&&path[2]){
