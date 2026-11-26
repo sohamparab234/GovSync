@@ -20,8 +20,37 @@ async function recordsFor(app:{id:string;service?:string}) {
  if(!required.every(d=>rows.results.some(r=>r.department===d)))throw new ApiError(409,'Complete all required department checks first.');
  return Object.fromEntries(rows.results.map(r=>[r.department,JSON.parse(r.normalized)]));
 }
-export async function GET(request:Request){return guarded(async()=>{
+export async function GET(request:Request){return guarded(async(requestId)=>{
  const url=new URL(request.url),path=url.pathname.replace(/^\/api\/?/,'').split('/'),db=database();
+ if(path[0]==='version'){
+  return reply({
+   name:'GovSync Interoperability API',
+   version:'1.0.0',
+   status:'operational',
+   timestamp:new Date().toISOString(),
+   requestId,
+   standards:{
+    protocol:'REST / JSON',
+    dateFormat:'ISO-8601 UTC',
+    supportedMethods:['GET','POST','OPTIONS','HEAD'],
+    trackingHeader:'X-Request-Id',
+    versionHeader:'API-Version'
+   },
+   services:{
+    count:Object.keys(services).length,
+    identifiers:Object.keys(services)
+   },
+   departments:{
+    count:allDepartments.length,
+    identifiers:allDepartments
+   },
+   privacy:{
+    consentModel:'Explicit purpose-bound scopes with 24h TTL and revocation',
+    auditModel:'Append-only immutable event log with actor attribution',
+    dataMinimization:'Zero citizen PII exposed on public endpoints'
+   }
+  });
+ }
  if(path[0]==='auth')return authRoute(request,path[1]);
  if(path[0]==='directory'){
   const query=url.searchParams.get('query')||undefined;
@@ -129,6 +158,28 @@ export async function GET(request:Request){return guarded(async()=>{
  if(path[0]==='applications'&&path[1]){
   const app=actor.role==='admin'?await db.prepare('SELECT * FROM applications WHERE id=?').bind(path[1]).first<ApplicationRecord>():await application(path[1],user);
   if(!app)throw new ApiError(404,'Application not found.');
+  if(path[2]==='consent'){
+   const now=new Date().toISOString();
+   const isRevoked=app.consent===0;
+   const isExpired=app.expires_at<=now;
+   const status=isRevoked?'revoked':(isExpired?'expired':'active');
+   const scopes=JSON.parse(app.scopes||'[]');
+   return reply({
+    applicationId:app.id,
+    service:app.service,
+    citizenId:app.citizen_id,
+    name:app.name,
+    consentGranted:app.consent===1,
+    status,
+    expiresAt:app.expires_at,
+    scopes,
+    purpose:'Identity verification and eligibility evaluation for government service delivery',
+    dataRetention:'Retained securely for the duration of the application processing lifecycle',
+    revocable:true,
+    revocationEndpoint:`/api/applications/${app.id}/revoke`,
+    createdAt:app.created_at
+   });
+  }
   if(path[2]==='certificate'){
    const svc=serviceOf(app),def=services[svc];
    if(!def?.supportsCertificate||app.status!=='approved')throw new ApiError(409,'Certificate is available only after department approval.');
@@ -155,7 +206,7 @@ export async function GET(request:Request){return guarded(async()=>{
   return reply({department:dept,citizenId:path[2],sample:true,raw,normalized});
  }
  throw new ApiError(404,'API endpoint not found.');
-});}
+},request);}
 export async function POST(request:Request){return guarded(async()=>{
  const path=new URL(request.url).pathname.replace(/^\/api\/?/,'').split('/'),db=database();
  if(path[0]==='auth')return authRoute(request,path[1]);
@@ -287,7 +338,7 @@ export async function POST(request:Request){return guarded(async()=>{
  }
  if(path[0]==='applications'&&path[1]){
   const app=await application(path[1],user),service=serviceOf(app);
-  if(path[2]==='revoke'){await db.batch([db.prepare('UPDATE applications SET consent = 0 WHERE id = ? AND owner = ?').bind(app.id,user),event(user,app.id,'Consent revoked','success','Further data access and submission blocked.')]);return reply({revoked:true});}
+  if(path[2]==='revoke'){await db.batch([db.prepare('UPDATE applications SET consent = 0 WHERE id = ? AND owner = ?').bind(app.id,user),event(user,app.id,'Consent revoked','success','Further data access and submission blocked.')]);return reply({revoked:true,applicationId:app.id,status:'revoked'});}
   consent(app);
   if(path[2]==='clarify'){
    if(app.status!=='clarification')throw new ApiError(409,'This application does not need clarification.');
@@ -349,4 +400,16 @@ export async function POST(request:Request){return guarded(async()=>{
   }
  }
  throw new ApiError(404,'API endpoint not found.');
-});}
+},request);}
+export async function OPTIONS(){
+ return new Response(null,{status:204,headers:{'Allow':'GET, POST, OPTIONS, HEAD','API-Version':'1.0','X-Content-Type-Options':'nosniff','X-Frame-Options':'DENY'}});
+}
+export async function PUT(request:Request){
+ return guarded(async()=>{throw new ApiError(405,'Method not allowed.','METHOD_NOT_ALLOWED');},request);
+}
+export async function PATCH(request:Request){
+ return guarded(async()=>{throw new ApiError(405,'Method not allowed.','METHOD_NOT_ALLOWED');},request);
+}
+export async function DELETE(request:Request){
+ return guarded(async()=>{throw new ApiError(405,'Method not allowed.','METHOD_NOT_ALLOWED');},request);
+}
